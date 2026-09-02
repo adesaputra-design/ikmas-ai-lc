@@ -113,7 +113,55 @@
             </div>
         </div>
     </div>
+<!-- Latest Learning Materials Section -->
+@if(isset($latestMaterials) && $latestMaterials->count() > 0)
+<section class="section" style="padding-top: 2rem;">
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <span class="badge badge-primary" style="margin-bottom: 0.5rem;">Study Group & Modul</span>
+                <h2 style="font-size: 2rem; font-weight: 800; letter-spacing: -0.02em;">Materi Belajar Terbaru</h2>
+            </div>
+            <a href="{{ url('/materi') }}" class="btn btn-secondary btn-sm">
+                Lihat Semua Materi ({{ \App\Models\LearningMaterial::where('is_published', true)->count() }}) →
+            </a>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+            @foreach($latestMaterials as $mat)
+                <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                            <span class="badge badge-{{ $mat->level_color }}">
+                                {{ $mat->level_label }}
+                            </span>
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">
+                                {{ $mat->reading_minutes }} Menit Baca
+                            </span>
+                        </div>
+                        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.35;">
+                            <a href="{{ url('/materi/' . $mat->slug) }}" style="color: var(--text-main);">
+                                {{ $mat->title }}
+                            </a>
+                        </h3>
+                        <p style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1rem;">
+                            {{ Str::limit($mat->summary, 110) }}
+                        </p>
+                    </div>
+                    <div style="border-top: 1px solid var(--border-color); padding-top: 0.875rem; display: flex; justify-content: space-between; align-items: center;">
+                        <span class="badge badge-cyan" style="font-size: 0.7rem;">
+                            {{ $mat->pillar_label }}
+                        </span>
+                        <a href="{{ url('/materi/' . $mat->slug) }}" class="btn btn-primary btn-sm">
+                            Baca Modul →
+                        </a>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
 </section>
+@endif
 
 <!-- 5 Learning Pillars Section -->
 <section class="section">
