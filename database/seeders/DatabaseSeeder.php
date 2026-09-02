@@ -357,5 +357,51 @@ Tolong bantu saya:
                 $p
             );
         }
+
+        // 5. Seed Events & Study Group Schedule
+        $events = [
+            [
+                'title' => 'AI Study Group Sesi #1: AI untuk Produktivitas Sehari-hari',
+                'slug' => 'ai-study-group-sesi-1-ai-untuk-produktivitas-sehari-hari',
+                'description' => 'Sesi belajar bersama perdana mengenal dan mempraktikkan AI untuk efisiensi pekerjaan harian: cara memberikan instruksi yang tepat, teknik prompt dasar, dan hands-on langsung.',
+                'event_date' => now()->addDays(4)->setTime(19, 30),
+                'duration_minutes' => 90,
+                'location_url' => 'https://zoom.us/j/sample-ikmas-ai',
+                'speaker_name' => 'Tim Fasilitator IKMAS AI',
+                'speaker_title' => 'Penggiat AI Alumni Assalaam',
+                'status' => 'upcoming',
+            ],
+            [
+                'title' => 'Workshop Daring: Merancang Konten & Desain Visual dengan Canva AI',
+                'slug' => 'workshop-daring-merancang-konten-desain-visual-canva-ai',
+                'description' => 'Eksplorasi pembuatan materi presentasi, poster kegiatan, dan konten media sosial yang rapi dan memikat dengan bantuan kecerdasan buatan dalam hitungan menit.',
+                'event_date' => now()->addDays(11)->setTime(20, 00),
+                'duration_minutes' => 90,
+                'location_url' => 'https://zoom.us/j/sample-ikmas-ai-2',
+                'speaker_name' => 'Alumni Praktisi Kreatif',
+                'speaker_title' => 'Graphic Designer & Content Strategist',
+                'status' => 'upcoming',
+            ],
+            [
+                'title' => 'Sharing Session: Pengantar & Peluncuran Komunitas IKMAS AI',
+                'slug' => 'sharing-session-pengantar-peluncuran-komunitas-ikmas-ai',
+                'description' => 'Temu silaturahmi daring dan sosialisasi visi IKMAS AI Learning Center serta perkenalan Agen Garuda kepada rekan-rekan alumni.',
+                'event_date' => now()->subDays(7)->setTime(19, 30),
+                'duration_minutes' => 60,
+                'location_url' => null,
+                'speaker_name' => 'Garuda & Inisiator Komunitas',
+                'speaker_title' => 'Pengurus IKMAS AI',
+                'status' => 'completed',
+                'recording_url' => 'https://youtube.com',
+                'materials_url' => '#',
+            ],
+        ];
+
+        foreach ($events as $ev) {
+            \App\Models\Event::firstOrCreate(
+                ['slug' => $ev['slug']],
+                $ev
+            );
+        }
     }
 }

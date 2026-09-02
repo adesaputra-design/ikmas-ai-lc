@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Event;
 use App\Models\LearningMaterial;
 use App\Models\Prompt;
 
@@ -21,6 +22,10 @@ class HomeController extends Controller
             ->take(3)
             ->get();
 
-        return view('home', compact('latestMaterials', 'featuredPrompts'));
+        $nextEvent = Event::where('status', 'upcoming')
+            ->orderBy('event_date', 'asc')
+            ->first();
+
+        return view('home', compact('latestMaterials', 'featuredPrompts', 'nextEvent'));
     }
 }

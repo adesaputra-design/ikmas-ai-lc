@@ -67,6 +67,35 @@
     </div>
 </section>
 
+<!-- Next Upcoming Event Announcement -->
+@if(isset($nextEvent))
+<div class="container" style="margin-top: -1.5rem; margin-bottom: 2rem;">
+    <div class="card card-elevated" style="border-left: 4px solid var(--accent-emerald); padding: 1.25rem 1.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.25rem;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <span class="badge badge-emerald">Jadwal Terdekat</span>
+            <div>
+                <a href="{{ url('/agenda/' . $nextEvent->slug) }}" style="font-weight: 700; font-size: 1.05rem; color: var(--text-main); display: block;">
+                    {{ $nextEvent->title }}
+                </a>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">
+                    📅 {{ $nextEvent->formatted_date }} &bull; 🎙 {{ $nextEvent->speaker_name }}
+                </span>
+            </div>
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <a href="{{ url('/agenda/' . $nextEvent->slug) }}" class="btn btn-secondary btn-sm">
+                Lihat Detail
+            </a>
+            @if($nextEvent->location_url)
+                <a href="{{ $nextEvent->location_url }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm">
+                    Ikuti Sesi ↗
+                </a>
+            @endif
+        </div>
+    </div>
+</div>
+@endif
+
 <!-- Garuda Onboarding Section -->
 <section class="container" id="komunitas-garuda">
     <div class="garuda-box">
