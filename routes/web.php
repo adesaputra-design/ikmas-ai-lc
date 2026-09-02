@@ -38,3 +38,10 @@ Route::middleware('auth')->prefix('member')->name('member.')->group(function () 
     Route::post('/showcase', [MemberDashboardController::class, 'storeShowcase'])->name('showcase.store');
     Route::post('/bookmarks/toggle', [MemberDashboardController::class, 'toggleBookmark'])->name('bookmarks.toggle');
 });
+
+// Admin Routes (Authenticated & Admin Role)
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::post('/curation/{showcase}/approve', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'approveShowcase'])->name('curation.approve');
+    Route::post('/curation/{showcase}/reject', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'rejectShowcase'])->name('curation.reject');
+});
