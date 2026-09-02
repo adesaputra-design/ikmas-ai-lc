@@ -23,8 +23,12 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Admin IKMAS AI',
                 'password' => Hash::make('password123'),
                 'email_verified_at' => now(),
+                'role' => 'admin',
+                'alumni_year' => '2010',
+                'whatsapp_number' => '081234567800',
             ]
         );
+        $admin->update(['role' => 'admin']);
 
         // 2. Seed Categories
         $catProductivity = Category::firstOrCreate(

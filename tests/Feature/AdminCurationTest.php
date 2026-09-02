@@ -20,6 +20,23 @@ class AdminCurationTest extends TestCase
         $response->assertStatus(403);
     }
 
+    public function test_admin_login_redirects_to_admin_dashboard(): void
+    {
+        $admin = User::factory()->create([
+            'email' => 'admin@ikmas.ai',
+            'password' => bcrypt('password123'),
+            'role' => 'admin',
+        ]);
+
+        $response = $this->post('/login', [
+            'email' => 'admin@ikmas.ai',
+            'password' => 'password123',
+        ]);
+
+        $response->assertRedirect('/admin/dashboard');
+        $this->assertAuthenticatedAs($admin);
+    }
+
     public function test_admin_can_access_dashboard_and_see_metrics(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
