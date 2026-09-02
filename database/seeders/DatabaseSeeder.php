@@ -403,5 +403,58 @@ Tolong bantu saya:
                 $ev
             );
         }
+
+        // 6. Seed Showcase Projects from Alumni
+        $alumni1 = User::firstOrCreate(
+            ['email' => 'fajar.alumni@example.com'],
+            [
+                'name' => 'Fajar Nugraha',
+                'password' => Hash::make('password123'),
+                'whatsapp_number' => '081234567811',
+                'alumni_year' => '2014',
+                'role' => 'member',
+            ]
+        );
+
+        $alumni2 = User::firstOrCreate(
+            ['email' => 'anisa.alumni@example.com'],
+            [
+                'name' => 'Anisa Rahmawati',
+                'password' => Hash::make('password123'),
+                'whatsapp_number' => '081234567822',
+                'alumni_year' => '2018',
+                'role' => 'member',
+            ]
+        );
+
+        $showcases = [
+            [
+                'user_id' => $alumni1->id,
+                'title' => 'Bot WA Layanan Pelanggan Otomatis Toko Batik Alumni',
+                'slug' => 'bot-wa-layanan-pelanggan-otomatis-toko-batik-alumni',
+                'description' => 'Solusi chatbot cerdas menggunakan integrasi OpenAI API dan WhatsApp Cloud API untuk menjawab pertanyaan seputar stok produk, ukuran kemeja, dan ongkos kirim secara otomatis 24 jam non-stop.',
+                'tools_used' => 'ChatGPT API, Node.js, WhatsApp Cloud API',
+                'project_url' => 'https://tokoalumni.test',
+                'impact_story' => 'Memangkas waktu tunggu respons calon pembeli dari 30 menit menjadi instan 5 detik, serta meningkatkan konversi penjualan online hingga 35% dalam 2 bulan pertama.',
+                'status' => 'approved',
+            ],
+            [
+                'user_id' => $alumni2->id,
+                'title' => 'E-Book Ilustrasi Cerita Edukasi Santri dengan Midjourney',
+                'slug' => 'e-book-ilustrasi-cerita-edukasi-santri-dengan-midjourney',
+                'description' => 'Proyek penerbitan digital mandiri yang memadukan cerita adab harian santri dengan ilustrasi visual berkualitas tinggi yang dibuat melalui panduan prompt Midjourney dan diedit di Canva.',
+                'tools_used' => 'Midjourney v6, Canva Magic, Claude',
+                'project_url' => 'https://karyasantri.test',
+                'impact_story' => 'Berhasil memproduksi 40 halaman ilustrasi penuh dalam 1 minggu (yang biasanya memakan waktu 2 bulan) dan telah dibaca oleh lebih dari 500 santri baru.',
+                'status' => 'approved',
+            ],
+        ];
+
+        foreach ($showcases as $sc) {
+            \App\Models\Showcase::firstOrCreate(
+                ['slug' => $sc['slug']],
+                $sc
+            );
+        }
     }
 }
