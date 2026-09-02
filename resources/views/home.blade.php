@@ -163,6 +163,52 @@
 </section>
 @endif
 
+<!-- Featured Prompts Section -->
+@if(isset($featuredPrompts) && $featuredPrompts->count() > 0)
+<section class="section" style="padding-top: 1rem; padding-bottom: 2rem;">
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <span class="badge badge-cyan" style="margin-bottom: 0.5rem;">Bank Instruksi 1-Click</span>
+                <h2 style="font-size: 2rem; font-weight: 800; letter-spacing: -0.02em;">Prompt Produktivitas Populer</h2>
+            </div>
+            <a href="{{ url('/prompts') }}" class="btn btn-secondary btn-sm">
+                Lihat Semua Prompt ({{ \App\Models\Prompt::count() }}) →
+            </a>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem;">
+            @foreach($featuredPrompts as $prompt)
+                <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                            <span class="badge badge-primary">{{ $prompt->target_role }}</span>
+                            <span class="badge badge-cyan" style="font-size: 0.7rem;">🛠 {{ $prompt->target_tool }}</span>
+                        </div>
+                        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.75rem; line-height: 1.35;">
+                            {{ $prompt->title }}
+                        </h3>
+                        <div style="background: var(--bg-surface-alt); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.875rem; margin-bottom: 0.875rem; font-family: monospace; font-size: 0.825rem; line-height: 1.5; color: var(--text-muted); max-height: 110px; overflow: hidden; position: relative;">
+                            {{ Str::limit($prompt->prompt_text, 140) }}
+                        </div>
+                    </div>
+                    <div style="border-top: 1px solid var(--border-color); padding-top: 0.875rem; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Disalin {{ $prompt->copy_count }}x</span>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="copyPrompt(this, `{{ addslashes($prompt->prompt_text) }}`)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            <span>Salin Prompt</span>
+                        </button>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif
+
 <!-- 5 Learning Pillars Section -->
 <section class="section">
     <div class="container">

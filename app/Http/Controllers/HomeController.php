@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LearningMaterial;
+use App\Models\Prompt;
 
 class HomeController extends Controller
 {
@@ -14,6 +15,12 @@ class HomeController extends Controller
             ->take(3)
             ->get();
 
-        return view('home', compact('latestMaterials'));
+        $featuredPrompts = Prompt::with('category')
+            ->where('is_featured', true)
+            ->latest()
+            ->take(3)
+            ->get();
+
+        return view('home', compact('latestMaterials', 'featuredPrompts'));
     }
 }

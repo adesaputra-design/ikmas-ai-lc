@@ -210,5 +210,152 @@ Buatkan tabel rangkuman dengan kolom:
                 $item
             );
         }
+
+        // 4. Seed Rich Prompt Library
+        $prompts = [
+            [
+                'category_id' => $catProductivity->id,
+                'title' => 'Formula Rangkuman Notulensi Rapat Jadi Action Plan',
+                'slug' => 'formula-rangkuman-notulensi-rapat-action-plan',
+                'target_role' => 'Umum & Produktivitas',
+                'target_tool' => 'ChatGPT / Claude',
+                'prompt_text' => 'Bertindaklah sebagai sekretaris eksekutif profesional.
+Berikut adalah catatan mentah / transkrip rapat tim kami:
+[Tempelkan teks notulensi rapat di sini]
+
+Tolong buatkan dokumen ringkasan yang rapi dengan format:
+1. Ringkasan Eksekutif (maksimal 3 kalimat)
+2. Keputusan Kunci yang Disepakati
+3. Tabel Matriks Tindakan Lanjut dengan kolom:
+   - Tindakan / Tugas Spesifik
+   - Penanggung Jawab (PIC)
+   - Tenggat Waktu (Deadline)
+   - Indikator Selesai
+Gunakan bahasa Indonesia baku yang lugas dan profesional.',
+                'instruction' => 'Ganti [Tempelkan teks notulensi rapat di sini] dengan draft coretan rapatmu.',
+                'tags' => 'notulensi, rapat, produktivitas, action plan',
+                'is_featured' => true,
+                'copy_count' => 48,
+            ],
+            [
+                'category_id' => $catOpportunity->id,
+                'title' => 'Formula Copywriting Penawaran Produk Berbasis Manfaat',
+                'slug' => 'formula-copywriting-penawaran-produk-berbasis-manfaat',
+                'target_role' => 'Pebisnis / Marketer',
+                'target_tool' => 'ChatGPT / Claude',
+                'prompt_text' => 'Bertindaklah sebagai copywriter konversi tinggi dengan pengalaman 10 tahun.
+Saya memiliki produk/layanan: [Nama & Jenis Produk]
+Target audiens utama saya adalah: [Jelaskan siapa calon pembelimu]
+Masalah terbesar yang dialami audiens saya saat ini adalah: [Masalah Utama]
+
+Tolong buatkan teks penawaran bergaya percakapan santai untuk WhatsApp / Landing Page dengan struktur:
+1. Hook menarik perhatian yang menyentuh masalah utama audiens
+2. Agitasi dampak negatif jika masalah tidak diselesaikan
+3. Solusi produk kami (jelaskan 3 fitur diubah menjadi MANFAAT nyata)
+4. Social proof / alasan kenapa kami bisa dipercaya
+5. Call to Action (CTA) yang jelas dan tanpa rasa tertekan
+Gunakan gaya bahasa hangat, tidak klise, dan hindari kata-kata lebay.',
+                'instruction' => 'Isi ketiga variabel bertanda kurung siku sesuai spesifikasi bisnismu.',
+                'tags' => 'copywriting, penjualan, wa marketing, bisnis',
+                'is_featured' => true,
+                'copy_count' => 65,
+            ],
+            [
+                'category_id' => $catPrompting->id,
+                'title' => 'Draf Email & Pesan Resmi untuk Pihak Eksternal / Klien',
+                'slug' => 'draf-email-dan-pesan-resmi-eksternal-klien',
+                'target_role' => 'Umum & Produktivitas',
+                'target_tool' => 'Claude / ChatGPT',
+                'prompt_text' => 'Saya ingin mengirimkan email kepada: [Penerima, misal: Klien / Calon Partner / Pimpinan Yayasan]
+Tujuan email ini adalah: [Tujuan, misal: Mengajukan proposal kerjasama / Follow up penawaran / Permohonan audiensi]
+Poin-poin penting yang harus tercantum:
+- [Poin 1]
+- [Poin 2]
+- [Poin 3]
+
+Tolong buatkan 2 pilihan draf:
+Pilihan A: Sangat formal dan terstruktur.
+Pilihan B: Semi-formal, hangat, namun tetap menghormati tata krama.
+Lengkapi dengan subjek email yang jelas dan menarik untuk dibuka.',
+                'instruction' => 'Sangat cocok untuk komunikasi antar alumni atau korespondensi kantor resmi.',
+                'tags' => 'email, komunikasi, surat, administrasi',
+                'is_featured' => false,
+                'copy_count' => 31,
+            ],
+            [
+                'category_id' => $catTools->id,
+                'title' => 'Perancang Kalender Konten Edukasi & Interaksi 30 Hari',
+                'slug' => 'perancang-kalender-konten-edukasi-interaksi-30-hari',
+                'target_role' => 'Penulis / Content Creator',
+                'target_tool' => 'ChatGPT / Claude',
+                'prompt_text' => 'Bertindaklah sebagai social media strategist.
+Topik atau niche akun saya adalah: [Topik Akun, misal: Edukasi Parenting Islami / Bisnis F&B / Belajar Bahasa Arab]
+Platform utama: [Instagram / TikTok / LinkedIn]
+
+Tolong rancang matriks kalender konten untuk 4 minggu (30 hari) dengan pembagian pilar:
+- 40% Edukasi praktis (Tips, how-to, tutorial)
+- 30% Inspirasi & Storytelling (Kisah nyata, refleksi, why)
+- 20% Interaksi & Engagement (Polling, tanya jawab, kuis)
+- 10% Promosi produk / ajakan bergabung
+
+Sajikan dalam bentuk tabel dengan kolom: Hari/Minggu, Format (Carousel/Reels/Single Image), Hook Utama, dan Ide Call to Action.',
+                'instruction' => 'Ganti niche akun dan platform sesuai saluran media sosial yang kamu kelola.',
+                'tags' => 'konten, social media, instagram, content creator',
+                'is_featured' => true,
+                'copy_count' => 54,
+            ],
+            [
+                'category_id' => $catWorkflow->id,
+                'title' => 'Perancang Rencana Pelajaran & Bahan Ajar Interaktif',
+                'slug' => 'perancang-rencana-pelajaran-bahan-ajar-interaktif',
+                'target_role' => 'Pendidik / Guru',
+                'target_tool' => 'ChatGPT / Gemini',
+                'prompt_text' => 'Bertindaklah sebagai konsultan kurikulum dan metode pengajaran inovatif.
+Mata pelajaran / Topik: [Topik Pelajaran, misal: Sejarah Peradaban Islam / Fisika Dasar Gerak Lurus]
+Tingkat peserta didik: [Tingkat, misal: Santri Pesantren Tingkat SMA / Mahasiswa Semester 1]
+Durasi sesi: [Durasi, misal: 90 menit]
+
+Tolong buatkan Modul Ajar terstruktur yang mencakup:
+1. Tujuan Pembelajaran (Capaian Spesifik)
+2. Pembuka / Ice Breaking Pemantik Rasa Ingin Tahu (15 menit)
+3. Inti Pembelajaran dengan Studi Kasus Nyata (50 menit)
+4. Aktivitas Interaktif Diskusi Kelompok (15 menit)
+5. Refleksi & Penutup (10 menit)
+6. 3 Pertanyaan Pemantik untuk Diskusi Mendalam',
+                'instruction' => 'Sangat membantu para alumni yang berprofesi sebagai ustadz, guru, dosen, atau instruktur pelatihan.',
+                'tags' => 'pendidikan, guru, modul ajar, silabus',
+                'is_featured' => false,
+                'copy_count' => 22,
+            ],
+            [
+                'category_id' => $catTools->id,
+                'title' => 'Asisten Review & Optimasi Kode Program untuk Pemula',
+                'slug' => 'asisten-review-optimasi-kode-program-pemula',
+                'target_role' => 'Developer / IT',
+                'target_tool' => 'Cursor / Claude',
+                'prompt_text' => 'Bertindaklah sebagai senior software engineer yang sabar dan membimbing junior programmer.
+Berikut adalah potongan kode program yang saya tulis:
+```[Bahasa, misal: php/javascript/python]
+[Tempelkan kode program di sini]
+```
+
+Tolong bantu saya:
+1. Jelaskan secara ringkas apa yang dilakukan kode ini
+2. Apakah ada potensi bug, celah keamanan, atau inefisiensi performa?
+3. Tuliskan versi refactoring yang lebih bersih, mematuhi best practice (clean code), dan mudah dibaca
+4. Berikan penjelasan mengapa perubahan tersebut lebih baik.',
+                'instruction' => 'Tempelkan kode dan tentukan bahasa pemrogramannya.',
+                'tags' => 'coding, programmer, php, refactoring',
+                'is_featured' => false,
+                'copy_count' => 39,
+            ],
+        ];
+
+        foreach ($prompts as $p) {
+            \App\Models\Prompt::firstOrCreate(
+                ['slug' => $p['slug']],
+                $p
+            );
+        }
     }
 }
