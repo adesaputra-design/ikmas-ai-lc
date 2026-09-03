@@ -43,6 +43,11 @@
                 <div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
                         <label for="password" style="font-size: 0.875rem; font-weight: 600;">Kata Sandi</label>
+                        <a href="https://wa.me/6285713257939?text=Assalamu%27alaikum+Admin+IKMAS+AI%2C+saya+lupa+kata+sandi+akun+portal+saya.+Mohon+bantuannya+untuk+reset+kata+sandi+ya.+Terima+kasih." 
+                           target="_blank" rel="noopener"
+                           style="font-size: 0.775rem; color: var(--primary); text-decoration: none; font-weight: 600;">
+                            Lupa kata sandi?
+                        </a>
                     </div>
                     <input type="password" id="password" name="password" required
                            placeholder="••••••••"

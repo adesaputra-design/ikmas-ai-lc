@@ -81,6 +81,27 @@ class AdminAlumniController extends Controller
         return back()->with('success', "Akun {$user->name} berhasil dipulihkan.");
     }
 
+    public function resetPassword(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'password' => ['required', 'string', 'min:8'],
+        ]);
+
+        $currentUser = auth()->user();
+
+        // Staf hanya boleh me-reset password akun member biasa
+        if ($currentUser->isStaff()) {
+            if ($user->role !== 'member') {
+                abort(403, 'Pencegahan Keamanan: Staf pengurus hanya memiliki izin mereset kata sandi untuk akun Member biasa.');
+            }
+        }
+
+        $user->password = \Illuminate\Support\Facades\Hash::make($validated['password']);
+        $user->save();
+
+        return back()->with('success', "Kata sandi untuk {$user->name} berhasil diperbarui.");
+    }
+
     public function exportCsv(Request $request): StreamedResponse
     {
         $filename = 'data-alumni-ikmas-ai-' . date('Y-m-d') . '.csv';

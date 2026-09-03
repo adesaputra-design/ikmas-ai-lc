@@ -99,4 +99,25 @@ class MemberDashboardController extends Controller
 
         return response()->json(['bookmarked' => true]);
     }
+
+    public function updatePassword(Request $request)
+    {
+        $validated = $request->validate([
+            'current_password' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user = Auth::user();
+
+        if (! \Illuminate\Support\Facades\Hash::check($validated['current_password'], $user->password)) {
+            return back()->withErrors([
+                'current_password' => 'Kata sandi saat ini yang Anda masukkan tidak sesuai.',
+            ]);
+        }
+
+        $user->password = \Illuminate\Support\Facades\Hash::make($validated['password']);
+        $user->save();
+
+        return back()->with('success', 'Kata sandi akun Anda berhasil diperbarui!');
+    }
 }

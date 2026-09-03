@@ -145,5 +145,56 @@
             </div>
         @endif
     </div>
+
+    <!-- Security & Change Password Section -->
+    <div style="margin-top: 3.5rem;">
+        <div style="margin-bottom: 1.5rem;">
+            <h2 style="font-size: 1.5rem; font-weight: 800;">Keamanan Akun & Kata Sandi</h2>
+            <p style="font-size: 0.875rem; color: var(--text-muted);">Perbarui kata sandi akun portal Anda secara berkala demi keamanan.</p>
+        </div>
+
+        <div class="card" style="max-width: 540px; padding: 1.75rem;">
+            @if(session('success'))
+                <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1.25rem; color: #10b981; font-size: 0.875rem; font-weight: 600;">
+                    ✓ {{ session('success') }}
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1.25rem; color: #ef4444; font-size: 0.875rem;">
+                    @foreach($errors->all() as $err)
+                        <div>• {{ $err }}</div>
+                    @endforeach
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('member.password.update') }}" style="display: flex; flex-direction: column; gap: 1rem;">
+                @csrf
+                <div>
+                    <label for="current_password" style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.35rem;">Kata Sandi Saat Ini</label>
+                    <input type="password" id="current_password" name="current_password" required
+                           style="width: 100%; padding: 0.55rem 0.85rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); color: var(--text-main); font-family: inherit; font-size: 0.875rem;">
+                </div>
+
+                <div>
+                    <label for="password" style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.35rem;">Kata Sandi Baru (Min. 8 karakter)</label>
+                    <input type="password" id="password" name="password" required minlength="8"
+                           style="width: 100%; padding: 0.55rem 0.85rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); color: var(--text-main); font-family: inherit; font-size: 0.875rem;">
+                </div>
+
+                <div>
+                    <label for="password_confirmation" style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.35rem;">Ulangi Kata Sandi Baru</label>
+                    <input type="password" id="password_confirmation" name="password_confirmation" required minlength="8"
+                           style="width: 100%; padding: 0.55rem 0.85rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); color: var(--text-main); font-family: inherit; font-size: 0.875rem;">
+                </div>
+
+                <div style="margin-top: 0.5rem;">
+                    <button type="submit" class="btn btn-primary btn-sm" style="padding: 0.5rem 1.25rem;">
+                        Perbarui Kata Sandi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 @endsection

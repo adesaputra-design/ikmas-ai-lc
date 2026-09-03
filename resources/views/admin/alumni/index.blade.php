@@ -80,9 +80,7 @@
                 <th style="padding: 1rem 1.25rem; font-weight: 700;">Karya</th>
                 <th style="padding: 1rem 1.25rem; font-weight: 700;">Role</th>
                 <th style="padding: 1rem 1.25rem; font-weight: 700;">Bergabung</th>
-                @if(auth()->user()->isAdmin())
-                    <th style="padding: 1rem 1.25rem; font-weight: 700; text-align: right;">Aksi</th>
-                @endif
+                <th style="padding: 1rem 1.25rem; font-weight: 700; text-align: right;">Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -137,35 +135,44 @@
                     <td style="padding: 1rem 1.25rem; color: var(--text-muted); font-size: 0.85rem;">
                         {{ $u->created_at ? $u->created_at->format('d/m/Y') : '-' }}
                     </td>
-                    @if(auth()->user()->isAdmin())
-                        <td style="padding: 1rem 1.25rem; text-align: right;">
+                    <td style="padding: 1rem 1.25rem; text-align: right;">
+                        <div style="display: flex; justify-content: flex-end; align-items: center; gap: 0.4rem;">
                             @if(($status ?? 'active') === 'trashed')
-                                <form action="{{ route('admin.alumni.restore', $u->id) }}" method="POST" onsubmit="return confirm('Pulihkan akun {{ $u->name }}?')">
-                                    @csrf
-                                    <button type="submit" class="btn btn-emerald btn-sm" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;">
-                                        ♻️ Pulihkan
-                                    </button>
-                                </form>
-                            @else
-                                @if($u->id !== auth()->id())
-                                    @if(!$u->isAdmin())
-                                        <button type="button" 
-                                                class="btn btn-sm" 
-                                                style="padding: 0.35rem 0.6rem; font-size: 0.75rem; border: 1px solid rgba(239,68,68,0.3); color: #ef4444; background: rgba(239,68,68,0.05);"
-                                                onclick="openAlumniDeleteModal('{{ $u->id }}', '{{ addslashes($u->name) }}', '{{ $u->showcases_count }}', '{{ route('admin.alumni.destroy', $u) }}')">
-                                            🗑️ Nonaktifkan
+                                @if(auth()->user()->isAdmin())
+                                    <form action="{{ route('admin.alumni.restore', $u->id) }}" method="POST" onsubmit="return confirm('Pulihkan akun {{ $u->name }}?')">
+                                        @csrf
+                                        <button type="submit" class="btn btn-emerald btn-sm" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;">
+                                            ♻️ Pulihkan
                                         </button>
-                                    @else
-                                        <span title="Administrator" style="font-size: 0.75rem; color: var(--text-muted);">🔒 Admin</span>
-                                    @endif
+                                    </form>
+                                @endif
+                            @else
+                                {{-- Tombol Reset Password (Admin bisa reset siapa saja, Staf hanya akun Member) --}}
+                                @if(auth()->user()->isAdmin() || $u->role === 'member')
+                                    <button type="button" 
+                                            class="btn btn-secondary btn-sm" 
+                                            style="padding: 0.35rem 0.65rem; font-size: 0.75rem;"
+                                            title="Reset Kata Sandi"
+                                            onclick="openResetPasswordModal('{{ $u->id }}', '{{ addslashes($u->name) }}', '{{ route('admin.alumni.reset-password', $u) }}')">
+                                        🔑 Reset
+                                    </button>
+                                @endif
+
+                                @if(auth()->user()->isAdmin() && $u->id !== auth()->id() && !$u->isAdmin())
+                                    <button type="button" 
+                                            class="btn btn-sm" 
+                                            style="padding: 0.35rem 0.6rem; font-size: 0.75rem; border: 1px solid rgba(239,68,68,0.3); color: #ef4444; background: rgba(239,68,68,0.05);"
+                                            onclick="openAlumniDeleteModal('{{ $u->id }}', '{{ addslashes($u->name) }}', '{{ $u->showcases_count }}', '{{ route('admin.alumni.destroy', $u) }}')">
+                                        🗑️
+                                    </button>
                                 @endif
                             @endif
-                        </td>
-                    @endif
+                        </div>
+                    </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="{{ auth()->user()->isAdmin() ? 8 : 7 }}" style="padding: 3rem; text-align: center; color: var(--text-muted);">
+                    <td colspan="8" style="padding: 3rem; text-align: center; color: var(--text-muted);">
                         Belum ada member alumni yang terdaftar sesuai kriteria pencarian.
                     </td>
                 </tr>
@@ -176,6 +183,56 @@
 
 <div style="margin-top: 1.5rem; display: flex; justify-content: center;">
     {{ $users->links() }}
+</div>
+
+<!-- Modal Reset Password -->
+<div id="resetPasswordModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1060; align-items: center; justify-content: center; padding: 1.5rem;">
+    <div class="card" style="width: 100%; max-width: 480px; padding: 1.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 1.25rem;">🔑</span>
+                <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0;">Reset Kata Sandi Member</h3>
+            </div>
+            <button type="button" onclick="closeResetPasswordModal()" style="background: none; border: none; font-size: 1.25rem; color: var(--text-muted); cursor: pointer;">✕</button>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+            Member: <strong id="resetTargetName" style="color: var(--text-main);"></strong>
+        </p>
+
+        <form id="resetPasswordForm" method="POST" action="">
+            @csrf
+            <div style="margin-bottom: 1rem;">
+                <label for="new_password" style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.4rem;">
+                    Kata Sandi Baru:
+                </label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="new_password" name="password" required minlength="8" placeholder="Minimal 8 karakter..."
+                           style="flex: 1; padding: 0.55rem 0.85rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); color: var(--text-main); font-family: monospace; font-size: 0.9rem;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="generateRandomPassword()" title="Buat password acak">
+                        🎲 Acak
+                    </button>
+                </div>
+            </div>
+
+            <div style="background: var(--bg-surface-alt); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.85rem; margin-bottom: 1.25rem;">
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.35rem;">
+                    KIRIM INFO KE MEMBER (WHATSAPP):
+                </div>
+                <p id="waPreviewText" style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 0.5rem; font-family: monospace; white-space: pre-line;">
+                    Halo [Nama], kata sandi akun IKMAS AI kamu telah direset. Kata sandi baru: ...
+                </p>
+                <button type="button" class="btn btn-whatsapp btn-sm" style="padding: 0.3rem 0.65rem; font-size: 0.75rem;" onclick="copyWaText()">
+                    📋 Salin Pesan WhatsApp
+                </button>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+                <button type="button" onclick="closeResetPasswordModal()" class="btn btn-secondary">Batal</button>
+                <button type="submit" class="btn btn-primary">Simpan Password Baru</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <!-- Modal Konfirmasi Nonaktifkan / Hapus -->
@@ -211,9 +268,52 @@
         </form>
     </div>
 </div>
+@endif
 
 @section('scripts')
 <script>
+    let currentResetName = '';
+
+    function openResetPasswordModal(id, name, actionUrl) {
+        currentResetName = name;
+        document.getElementById('resetTargetName').innerText = name;
+        document.getElementById('resetPasswordForm').action = actionUrl;
+        generateRandomPassword();
+        document.getElementById('resetPasswordModal').style.display = 'flex';
+    }
+
+    function closeResetPasswordModal() {
+        document.getElementById('resetPasswordModal').style.display = 'none';
+    }
+
+    function generateRandomPassword() {
+        const chars = 'abcdefghjkmnpqrstuvwxyz23456789';
+        let pass = 'ikmas-';
+        for (let i = 0; i < 5; i++) {
+            pass += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        const input = document.getElementById('new_password');
+        input.value = pass;
+        updateWaPreview(pass);
+    }
+
+    function updateWaPreview(pass) {
+        const text = `Assalamu'alaikum ${currentResetName}, kata sandi akun portal IKMAS AI kamu telah direset oleh pengurus.\n\nKata sandi baru: ${pass}\n\nSilakan segera login di https://ai.ikmas.com/login dan kamu dapat mengganti kata sandi di Dasbor Akun kamu. Terima kasih!`;
+        document.getElementById('waPreviewText').innerText = text;
+    }
+
+    document.getElementById('new_password')?.addEventListener('input', function(e) {
+        updateWaPreview(e.target.value);
+    });
+
+    function copyWaText() {
+        const pass = document.getElementById('new_password').value;
+        const text = `Assalamu'alaikum ${currentResetName}, kata sandi akun portal IKMAS AI kamu telah direset oleh pengurus.\n\nKata sandi baru: ${pass}\n\nSilakan segera login di https://ai.ikmas.com/login dan kamu dapat mengganti kata sandi di Dasbor Akun kamu. Terima kasih!`;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Teks WhatsApp berhasil disalin ke clipboard!');
+        });
+    }
+
     function openAlumniDeleteModal(id, name, showcaseCount, actionUrl) {
         document.getElementById('alumniDeleteName').innerText = name;
         document.getElementById('alumniShowcaseCount').innerText = showcaseCount;
@@ -226,11 +326,12 @@
     }
 
     window.onclick = function(event) {
-        const modal = document.getElementById('alumniDeleteModal');
-        if (event.target === modal) closeAlumniDeleteModal();
+        const delModal = document.getElementById('alumniDeleteModal');
+        const resetModal = document.getElementById('resetPasswordModal');
+        if (event.target === delModal) closeAlumniDeleteModal();
+        if (event.target === resetModal) closeResetPasswordModal();
     }
 </script>
 @endsection
-@endif
 
 @endsection

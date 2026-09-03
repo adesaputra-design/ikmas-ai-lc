@@ -180,6 +180,15 @@
                                     ⚙️ Atur Tugas
                                 </button>
 
+                                <!-- Tombol Reset Password -->
+                                <button type="button" 
+                                        class="btn btn-secondary btn-sm" 
+                                        style="padding: 0.35rem 0.65rem; font-size: 0.75rem;"
+                                        title="Reset Kata Sandi"
+                                        onclick="openTeamResetModal('{{ $u->id }}', '{{ addslashes($u->name) }}', '{{ route('admin.team.reset-password', $u) }}')">
+                                    🔑 Reset
+                                </button>
+
                                 <!-- Tombol Nonaktifkan Akun (Hanya jika bukan diri sendiri dan bukan admin) -->
                                 @if($u->id !== auth()->id())
                                     @if(!$u->isAdmin())
@@ -324,10 +333,102 @@
         </form>
     </div>
 </div>
+
+<!-- Modal Reset Password -->
+<div id="teamResetPasswordModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1060; align-items: center; justify-content: center; padding: 1.5rem;">
+    <div class="card" style="width: 100%; max-width: 480px; padding: 1.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 1.25rem;">🔑</span>
+                <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0;">Reset Kata Sandi Akun</h3>
+            </div>
+            <button type="button" onclick="closeTeamResetModal()" style="background: none; border: none; font-size: 1.25rem; color: var(--text-muted); cursor: pointer;">✕</button>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+            Pengguna: <strong id="teamResetTargetName" style="color: var(--text-main);"></strong>
+        </p>
+
+        <form id="teamResetPasswordForm" method="POST" action="">
+            @csrf
+            <div style="margin-bottom: 1rem;">
+                <label for="team_new_password" style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.4rem;">
+                    Kata Sandi Baru:
+                </label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="team_new_password" name="password" required minlength="8" placeholder="Minimal 8 karakter..."
+                           style="flex: 1; padding: 0.55rem 0.85rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); color: var(--text-main); font-family: monospace; font-size: 0.9rem;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="generateTeamRandomPassword()" title="Buat password acak">
+                        🎲 Acak
+                    </button>
+                </div>
+            </div>
+
+            <div style="background: var(--bg-surface-alt); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.85rem; margin-bottom: 1.25rem;">
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.35rem;">
+                    KIRIM INFO KE PENGGUNA (WHATSAPP):
+                </div>
+                <p id="teamWaPreviewText" style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 0.5rem; font-family: monospace; white-space: pre-line;">
+                    Halo [Nama], kata sandi akun IKMAS AI kamu telah direset. Kata sandi baru: ...
+                </p>
+                <button type="button" class="btn btn-whatsapp btn-sm" style="padding: 0.3rem 0.65rem; font-size: 0.75rem;" onclick="copyTeamWaText()">
+                    📋 Salin Pesan WhatsApp
+                </button>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+                <button type="button" onclick="closeTeamResetModal()" class="btn btn-secondary">Batal</button>
+                <button type="submit" class="btn btn-primary">Simpan Password Baru</button>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
 <script>
+    let teamCurrentResetName = '';
+
+    function openTeamResetModal(id, name, actionUrl) {
+        teamCurrentResetName = name;
+        document.getElementById('teamResetTargetName').innerText = name;
+        document.getElementById('teamResetPasswordForm').action = actionUrl;
+        generateTeamRandomPassword();
+        document.getElementById('teamResetPasswordModal').style.display = 'flex';
+    }
+
+    function closeTeamResetModal() {
+        document.getElementById('teamResetPasswordModal').style.display = 'none';
+    }
+
+    function generateTeamRandomPassword() {
+        const chars = 'abcdefghjkmnpqrstuvwxyz23456789';
+        let pass = 'ikmas-';
+        for (let i = 0; i < 5; i++) {
+            pass += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        const input = document.getElementById('team_new_password');
+        input.value = pass;
+        updateTeamWaPreview(pass);
+    }
+
+    function updateTeamWaPreview(pass) {
+        const text = `Assalamu'alaikum ${teamCurrentResetName}, kata sandi akun portal IKMAS AI kamu telah direset oleh pengurus.\n\nKata sandi baru: ${pass}\n\nSilakan segera login di https://ai.ikmas.com/login dan kamu dapat mengganti kata sandi di Dasbor Akun kamu. Terima kasih!`;
+        document.getElementById('teamWaPreviewText').innerText = text;
+    }
+
+    document.getElementById('team_new_password')?.addEventListener('input', function(e) {
+        updateTeamWaPreview(e.target.value);
+    });
+
+    function copyTeamWaText() {
+        const pass = document.getElementById('team_new_password').value;
+        const text = `Assalamu'alaikum ${teamCurrentResetName}, kata sandi akun portal IKMAS AI kamu telah direset oleh pengurus.\n\nKata sandi baru: ${pass}\n\nSilakan segera login di https://ai.ikmas.com/login dan kamu dapat mengganti kata sandi di Dasbor Akun kamu. Terima kasih!`;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Teks WhatsApp berhasil disalin ke clipboard!');
+        });
+    }
+
     function openRoleModal(data) {
         document.getElementById('modalUserName').innerText = data.name;
         document.getElementById('roleForm').action = '/admin/team/' + data.id + '/role';
@@ -382,8 +483,10 @@
     window.onclick = function(event) {
         const roleModal = document.getElementById('roleModal');
         const deleteModal = document.getElementById('deleteModal');
+        const resetModal = document.getElementById('teamResetPasswordModal');
         if (event.target === roleModal) closeRoleModal();
         if (event.target === deleteModal) closeDeleteModal();
+        if (event.target === resetModal) closeTeamResetModal();
     }
 </script>
 @endsection

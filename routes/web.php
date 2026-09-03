@@ -40,6 +40,7 @@ Route::middleware('auth')->prefix('member')->name('member.')->group(function () 
     Route::get('/showcase/create', [MemberDashboardController::class, 'createShowcase'])->name('showcase.create');
     Route::post('/showcase', [MemberDashboardController::class, 'storeShowcase'])->name('showcase.store');
     Route::post('/bookmarks/toggle', [MemberDashboardController::class, 'toggleBookmark'])->name('bookmarks.toggle');
+    Route::post('/password', [MemberDashboardController::class, 'updatePassword'])->name('password.update');
 });
 
 // Admin Routes (Authenticated & Admin or Staff Role)
@@ -75,6 +76,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::middleware('permission:alumni')->group(function () {
         Route::get('/alumni', [\App\Http\Controllers\Admin\AdminAlumniController::class, 'index'])->name('alumni.index');
         Route::get('/alumni/export', [\App\Http\Controllers\Admin\AdminAlumniController::class, 'exportCsv'])->name('alumni.export');
+        Route::post('/alumni/{user}/reset-password', [\App\Http\Controllers\Admin\AdminAlumniController::class, 'resetPassword'])->name('alumni.reset-password');
     });
 
     // Modul Halaman Tentang
@@ -89,6 +91,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::post('/team/{user}/role', [\App\Http\Controllers\Admin\AdminTeamController::class, 'updateRole'])->name('team.update-role');
         Route::delete('/team/{user}', [\App\Http\Controllers\Admin\AdminTeamController::class, 'destroy'])->name('team.destroy');
         Route::post('/team/{id}/restore', [\App\Http\Controllers\Admin\AdminTeamController::class, 'restore'])->name('team.restore');
+        Route::post('/team/{user}/reset-password', [\App\Http\Controllers\Admin\AdminTeamController::class, 'resetPassword'])->name('team.reset-password');
 
         Route::delete('/alumni/{user}', [\App\Http\Controllers\Admin\AdminAlumniController::class, 'destroy'])->name('alumni.destroy');
         Route::post('/alumni/{id}/restore', [\App\Http\Controllers\Admin\AdminAlumniController::class, 'restore'])->name('alumni.restore');

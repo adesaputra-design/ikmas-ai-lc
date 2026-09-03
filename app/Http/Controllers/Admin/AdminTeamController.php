@@ -131,4 +131,16 @@ class AdminTeamController extends Controller
 
         return back()->with('success', "Akun {$user->name} berhasil dipulihkan kembali dan dapat login seperti semula.");
     }
+
+    public function resetPassword(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'password' => ['required', 'string', 'min:8'],
+        ]);
+
+        $user->password = \Illuminate\Support\Facades\Hash::make($validated['password']);
+        $user->save();
+
+        return back()->with('success', "Kata sandi untuk {$user->name} berhasil diperbarui.");
+    }
 }
