@@ -23,18 +23,35 @@
             Aksi Cepat Pengurus
         </div>
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            @if(auth()->user()->hasPermission('materials'))
             <a href="{{ url('/admin/materi/create') }}" class="btn btn-primary btn-sm">
                 + Materi Baru
             </a>
+            @endif
+
+            @if(auth()->user()->hasPermission('prompts'))
             <a href="{{ url('/admin/prompts/create') }}" class="btn btn-secondary btn-sm">
                 + Tambah Prompt
             </a>
+            @endif
+
+            @if(auth()->user()->hasPermission('events'))
             <a href="{{ url('/admin/agenda/create') }}" class="btn btn-secondary btn-sm">
                 + Jadwalkan Event
             </a>
+            @endif
+
+            @if(auth()->user()->hasPermission('curation'))
             <a href="{{ url('/admin/curation') }}" class="btn btn-secondary btn-sm" style="border-color: var(--accent-amber); color: var(--accent-amber);">
                 Tinjau Kurasi ({{ $metrics['pending_curation'] }})
             </a>
+            @endif
+
+            @if(auth()->user()->isAdmin())
+            <a href="{{ url('/admin/team') }}" class="btn btn-secondary btn-sm" style="border-color: var(--primary); color: var(--primary);">
+                👥 Kelola Tim & Staf
+            </a>
+            @endif
         </div>
     </div>
 </div>

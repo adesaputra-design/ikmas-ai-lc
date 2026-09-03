@@ -42,20 +42,55 @@ Route::middleware('auth')->prefix('member')->name('member.')->group(function () 
     Route::post('/bookmarks/toggle', [MemberDashboardController::class, 'toggleBookmark'])->name('bookmarks.toggle');
 });
 
-// Admin Routes (Authenticated & Admin Role)
+// Admin Routes (Authenticated & Admin or Staff Role)
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
-    Route::resource('materi', \App\Http\Controllers\Admin\AdminLearningMaterialController::class);
-    Route::resource('prompts', \App\Http\Controllers\Admin\AdminPromptController::class);
-    Route::resource('agenda', \App\Http\Controllers\Admin\AdminEventController::class);
-    Route::get('agenda/{agenda}/broadcast-text', [\App\Http\Controllers\Admin\AdminEventController::class, 'getBroadcastText'])->name('agenda.broadcast');
-    Route::get('/curation', [\App\Http\Controllers\Admin\AdminShowcaseCurationController::class, 'index'])->name('curation.index');
-    Route::post('/curation/{showcase}/approve', [\App\Http\Controllers\Admin\AdminShowcaseCurationController::class, 'approve'])->name('curation.approve');
-    Route::post('/curation/{showcase}/reject', [\App\Http\Controllers\Admin\AdminShowcaseCurationController::class, 'reject'])->name('curation.reject');
-    Route::post('/curation/{showcase}/toggle-featured', [\App\Http\Controllers\Admin\AdminShowcaseCurationController::class, 'toggleFeatured'])->name('curation.toggle-featured');
-    Route::delete('/curation/{showcase}', [\App\Http\Controllers\Admin\AdminShowcaseCurationController::class, 'destroy'])->name('curation.destroy');
-    Route::get('/alumni', [\App\Http\Controllers\Admin\AdminAlumniController::class, 'index'])->name('alumni.index');
-    Route::get('/alumni/export', [\App\Http\Controllers\Admin\AdminAlumniController::class, 'exportCsv'])->name('alumni.export');
-    Route::get('/tentang', [\App\Http\Controllers\Admin\AdminTentangController::class, 'index'])->name('tentang.index');
-    Route::post('/tentang', [\App\Http\Controllers\Admin\AdminTentangController::class, 'update'])->name('tentang.update');
+
+    // Modul Materi
+    Route::middleware('permission:materials')->group(function () {
+        Route::resource('materi', \App\Http\Controllers\Admin\AdminLearningMaterialController::class);
+    });
+
+    // Modul Prompts
+    Route::middleware('permission:prompts')->group(function () {
+        Route::resource('prompts', \App\Http\Controllers\Admin\AdminPromptController::class);
+    });
+
+    // Modul Agenda
+    Route::middleware('permission:events')->group(function () {
+        Route::resource('agenda', \App\Http\Controllers\Admin\AdminEventController::class);
+        Route::get('agenda/{agenda}/broadcast-text', [\App\Http\Controllers\Admin\AdminEventController::class, 'getBroadcastText'])->name('agenda.broadcast');
+    });
+
+    // Modul Kurasi Showcase
+    Route::middleware('permission:curation')->group(function () {
+        Route::get('/curation', [\App\Http\Controllers\Admin\AdminShowcaseCurationController::class, 'index'])->name('curation.index');
+        Route::post('/curation/{showcase}/approve', [\App\Http\Controllers\Admin\AdminShowcaseCurationController::class, 'approve'])->name('curation.approve');
+        Route::post('/curation/{showcase}/reject', [\App\Http\Controllers\Admin\AdminShowcaseCurationController::class, 'reject'])->name('curation.reject');
+        Route::post('/curation/{showcase}/toggle-featured', [\App\Http\Controllers\Admin\AdminShowcaseCurationController::class, 'toggleFeatured'])->name('curation.toggle-featured');
+        Route::delete('/curation/{showcase}', [\App\Http\Controllers\Admin\AdminShowcaseCurationController::class, 'destroy'])->name('curation.destroy');
+    });
+
+    // Modul Alumni (Direktori)
+    Route::middleware('permission:alumni')->group(function () {
+        Route::get('/alumni', [\App\Http\Controllers\Admin\AdminAlumniController::class, 'index'])->name('alumni.index');
+        Route::get('/alumni/export', [\App\Http\Controllers\Admin\AdminAlumniController::class, 'exportCsv'])->name('alumni.export');
+    });
+
+    // Modul Halaman Tentang
+    Route::middleware('permission:pages')->group(function () {
+        Route::get('/tentang', [\App\Http\Controllers\Admin\AdminTentangController::class, 'index'])->name('tentang.index');
+        Route::post('/tentang', [\App\Http\Controllers\Admin\AdminTentangController::class, 'update'])->name('tentang.update');
+    });
+
+    // Modul Kelola Tim & Staf + Hapus Anggota (Eksklusif Admin Utama)
+    Route::middleware('permission:manage_team')->group(function () {
+        Route::get('/team', [\App\Http\Controllers\Admin\AdminTeamController::class, 'index'])->name('team.index');
+        Route::post('/team/{user}/role', [\App\Http\Controllers\Admin\AdminTeamController::class, 'updateRole'])->name('team.update-role');
+        Route::delete('/team/{user}', [\App\Http\Controllers\Admin\AdminTeamController::class, 'destroy'])->name('team.destroy');
+        Route::post('/team/{id}/restore', [\App\Http\Controllers\Admin\AdminTeamController::class, 'restore'])->name('team.restore');
+
+        Route::delete('/alumni/{user}', [\App\Http\Controllers\Admin\AdminAlumniController::class, 'destroy'])->name('alumni.destroy');
+        Route::post('/alumni/{id}/restore', [\App\Http\Controllers\Admin\AdminAlumniController::class, 'restore'])->name('alumni.restore');
+    });
 });

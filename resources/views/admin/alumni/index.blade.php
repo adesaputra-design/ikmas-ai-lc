@@ -23,9 +23,25 @@
     </div>
 </div>
 
+<!-- Tabs Status: Aktif vs Dinonaktifkan -->
+<div style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+    <a href="{{ route('admin.alumni.index', array_merge(request()->except(['page', 'status']), ['status' => 'active'])) }}" 
+       class="btn {{ ($status ?? 'active') !== 'trashed' ? 'btn-primary' : 'btn-secondary' }} btn-sm"
+       style="border-radius: 999px; padding: 0.4rem 1rem;">
+        Member Aktif ({{ $totalMembers ?? 0 }})
+    </a>
+    <a href="{{ route('admin.alumni.index', array_merge(request()->except(['page', 'status']), ['status' => 'trashed'])) }}" 
+       class="btn {{ ($status ?? '') === 'trashed' ? 'btn-primary' : 'btn-secondary' }} btn-sm"
+       style="border-radius: 999px; padding: 0.4rem 1rem;">
+        Dinonaktifkan ({{ $totalTrashed ?? 0 }})
+    </a>
+</div>
+
 <!-- Filters Bar -->
 <div class="card" style="padding: 1.25rem; margin-bottom: 1.5rem;">
     <form method="GET" action="{{ route('admin.alumni.index') }}" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+        <input type="hidden" name="status" value="{{ $status ?? 'active' }}">
+        
         <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari nama, email, atau no. WA..."
                style="flex: 1; min-width: 220px; padding: 0.5rem 0.85rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); color: var(--text-main); font-family: inherit; font-size: 0.875rem;">
 
@@ -38,9 +54,16 @@
             @endforeach
         </select>
 
+        <select name="role" style="padding: 0.5rem 0.85rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); color: var(--text-main); font-family: inherit; font-size: 0.875rem;">
+            <option value="">Semua Peran</option>
+            <option value="member" {{ request('role') == 'member' ? 'selected' : '' }}>Member Alumni</option>
+            <option value="staff" {{ request('role') == 'staff' ? 'selected' : '' }}>Staf Pengurus</option>
+            <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Administrator</option>
+        </select>
+
         <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-        @if(request()->anyFilled(['q', 'alumni_year']))
-            <a href="{{ route('admin.alumni.index') }}" class="btn btn-secondary btn-sm">Reset</a>
+        @if(request()->anyFilled(['q', 'alumni_year', 'role']))
+            <a href="{{ route('admin.alumni.index', ['status' => $status ?? 'active']) }}" class="btn btn-secondary btn-sm">Reset</a>
         @endif
     </form>
 </div>
@@ -57,6 +80,9 @@
                 <th style="padding: 1rem 1.25rem; font-weight: 700;">Karya</th>
                 <th style="padding: 1rem 1.25rem; font-weight: 700;">Role</th>
                 <th style="padding: 1rem 1.25rem; font-weight: 700;">Bergabung</th>
+                @if(auth()->user()->isAdmin())
+                    <th style="padding: 1rem 1.25rem; font-weight: 700; text-align: right;">Aksi</th>
+                @endif
             </tr>
         </thead>
         <tbody>
@@ -69,6 +95,9 @@
                             </div>
                             <div style="font-weight: 700; color: var(--text-main);">
                                 {{ $u->name }}
+                                @if($u->id === auth()->id())
+                                    <span class="badge badge-amber" style="font-size: 0.65rem; padding: 0.1rem 0.35rem;">Anda</span>
+                                @endif
                             </div>
                         </div>
                     </td>
@@ -100,19 +129,43 @@
                         @endif
                     </td>
                     <td style="padding: 1rem 1.25rem;">
-                        @if($u->role === 'admin')
-                            <span class="badge badge-cyan" style="font-size: 0.75rem;">Pengurus</span>
-                        @else
-                            <span class="badge" style="background: var(--bg-surface-alt); color: var(--text-muted); font-size: 0.75rem;">Member</span>
-                        @endif
+                        @php $badge = $u->role_badge; @endphp
+                        <span class="badge {{ $badge['class'] }}" style="font-size: 0.75rem;">
+                            {{ $badge['label'] }}
+                        </span>
                     </td>
                     <td style="padding: 1rem 1.25rem; color: var(--text-muted); font-size: 0.85rem;">
                         {{ $u->created_at ? $u->created_at->format('d/m/Y') : '-' }}
                     </td>
+                    @if(auth()->user()->isAdmin())
+                        <td style="padding: 1rem 1.25rem; text-align: right;">
+                            @if(($status ?? 'active') === 'trashed')
+                                <form action="{{ route('admin.alumni.restore', $u->id) }}" method="POST" onsubmit="return confirm('Pulihkan akun {{ $u->name }}?')">
+                                    @csrf
+                                    <button type="submit" class="btn btn-emerald btn-sm" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;">
+                                        ♻️ Pulihkan
+                                    </button>
+                                </form>
+                            @else
+                                @if($u->id !== auth()->id())
+                                    @if(!$u->isAdmin())
+                                        <button type="button" 
+                                                class="btn btn-sm" 
+                                                style="padding: 0.35rem 0.6rem; font-size: 0.75rem; border: 1px solid rgba(239,68,68,0.3); color: #ef4444; background: rgba(239,68,68,0.05);"
+                                                onclick="openAlumniDeleteModal('{{ $u->id }}', '{{ addslashes($u->name) }}', '{{ $u->showcases_count }}', '{{ route('admin.alumni.destroy', $u) }}')">
+                                            🗑️ Nonaktifkan
+                                        </button>
+                                    @else
+                                        <span title="Administrator" style="font-size: 0.75rem; color: var(--text-muted);">🔒 Admin</span>
+                                    @endif
+                                @endif
+                            @endif
+                        </td>
+                    @endif
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" style="padding: 3rem; text-align: center; color: var(--text-muted);">
+                    <td colspan="{{ auth()->user()->isAdmin() ? 8 : 7 }}" style="padding: 3rem; text-align: center; color: var(--text-muted);">
                         Belum ada member alumni yang terdaftar sesuai kriteria pencarian.
                     </td>
                 </tr>
@@ -124,4 +177,60 @@
 <div style="margin-top: 1.5rem; display: flex; justify-content: center;">
     {{ $users->links() }}
 </div>
+
+<!-- Modal Konfirmasi Nonaktifkan / Hapus -->
+@if(auth()->user()->isAdmin())
+<div id="alumniDeleteModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1060; align-items: center; justify-content: center; padding: 1.5rem;">
+    <div class="card" style="width: 100%; max-width: 480px; padding: 1.75rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; color: #ef4444;">
+            <div style="width: 2.5rem; height: 2.5rem; border-radius: 50%; background: rgba(239,68,68,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                ⚠️
+            </div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0;">Nonaktifkan Akun Anggota?</h3>
+        </div>
+
+        <p style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1rem;">
+            Apakah Anda yakin ingin menonaktifkan akun <strong id="alumniDeleteName" style="color: var(--text-main);"></strong>?
+        </p>
+
+        <div style="background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.2); border-radius: var(--radius-md); padding: 0.85rem; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+            <div>• Akun tidak akan dapat login lagi ke portal.</div>
+            <div>• <strong id="alumniShowcaseCount"></strong> karya showcase miliknya otomatis disembunyikan dari web publik.</div>
+            <div>• Data tetap aman dan dapat Anda <strong>pulihkan (restore)</strong> kapan saja.</div>
+        </div>
+
+        <form id="alumniDeleteForm" method="POST" action="">
+            @csrf
+            @method('DELETE')
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+                <button type="button" onclick="closeAlumniDeleteModal()" class="btn btn-secondary">Batal</button>
+                <button type="submit" class="btn btn-primary" style="background: #ef4444; border-color: #ef4444;">
+                    Ya, Nonaktifkan Akun
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section('scripts')
+<script>
+    function openAlumniDeleteModal(id, name, showcaseCount, actionUrl) {
+        document.getElementById('alumniDeleteName').innerText = name;
+        document.getElementById('alumniShowcaseCount').innerText = showcaseCount;
+        document.getElementById('alumniDeleteForm').action = actionUrl;
+        document.getElementById('alumniDeleteModal').style.display = 'flex';
+    }
+
+    function closeAlumniDeleteModal() {
+        document.getElementById('alumniDeleteModal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('alumniDeleteModal');
+        if (event.target === modal) closeAlumniDeleteModal();
+    }
+</script>
+@endsection
+@endif
+
 @endsection

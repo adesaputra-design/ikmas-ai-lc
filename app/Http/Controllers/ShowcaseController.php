@@ -10,6 +10,7 @@ class ShowcaseController extends Controller
     public function index(Request $request)
     {
         $query = Showcase::with('user')
+            ->whereHas('user')
             ->where('status', 'approved');
 
         if ($request->filled('q')) {
@@ -29,6 +30,7 @@ class ShowcaseController extends Controller
     public function show(string $slug)
     {
         $showcase = Showcase::with('user')
+            ->whereHas('user')
             ->where('slug', $slug)
             ->where('status', 'approved')
             ->firstOrFail();

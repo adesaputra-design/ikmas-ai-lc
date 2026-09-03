@@ -12,11 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('whatsapp_number')->nullable()->after('email');
-            $table->string('alumni_year')->nullable()->after('whatsapp_number');
-            $table->text('bio')->nullable()->after('alumni_year');
-            $table->string('role', 30)->default('member')->after('bio');
-            $table->string('avatar')->nullable()->after('role');
+            $table->json('permissions')->nullable()->after('role');
+            $table->softDeletes()->after('updated_at');
         });
     }
 
@@ -26,7 +23,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['whatsapp_number', 'alumni_year', 'bio', 'role', 'avatar']);
+            $table->dropColumn('permissions');
+            $table->dropSoftDeletes();
         });
     }
 };

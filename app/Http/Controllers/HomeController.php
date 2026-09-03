@@ -30,6 +30,7 @@ class HomeController extends Controller
 
         // 5 Aktivitas Terbaru Gabungan (Showcase, Member Join, Event)
         $recentShowcases = Showcase::where('status', 'approved')
+            ->whereHas('user')
             ->with('user')
             ->latest()
             ->take(5)

@@ -15,7 +15,7 @@ class EnsureUserIsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->user() || $request->user()->role !== 'admin') {
+        if (! $request->user() || (! $request->user()->isAdmin() && ! $request->user()->isStaff())) {
             abort(403, 'Akses Ditolak. Halaman ini hanya dapat diakses oleh Administrator & Pengurus IKMAS AI.');
         }
 

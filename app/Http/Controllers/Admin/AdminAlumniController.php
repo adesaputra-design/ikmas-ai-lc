@@ -11,7 +11,10 @@ class AdminAlumniController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::withCount('showcases')->latest();
+        $status = $request->get('status', 'active');
+        $query = $status === 'trashed' 
+            ? User::onlyTrashed()->withCount('showcases')->latest() 
+            : User::withCount('showcases')->latest();
 
         if ($request->filled('alumni_year')) {
             $query->where('alumni_year', $request->alumni_year);
@@ -40,8 +43,42 @@ class AdminAlumniController extends Controller
             ->sortDesc();
 
         $totalMembers = User::where('role', 'member')->count();
+        $totalTrashed = User::onlyTrashed()->count();
 
-        return view('admin.alumni.index', compact('users', 'alumniYears', 'totalMembers'));
+        return view('admin.alumni.index', compact('users', 'alumniYears', 'totalMembers', 'totalTrashed', 'status'));
+    }
+
+    public function destroy(User $user)
+    {
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Hanya Administrator yang berwenang menonaktifkan akun anggota.');
+        }
+
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'Anda tidak dapat menonaktifkan akun Anda sendiri.');
+        }
+
+        if ($user->isAdmin()) {
+            return back()->with('error', 'Akun Administrator tidak dapat dinonaktifkan langsung.');
+        }
+
+        $name = $user->name;
+        $count = $user->showcases()->count();
+        $user->delete();
+
+        return back()->with('success', "Akun {$name} berhasil dinonaktifkan dan {$count} karyanya disembunyikan sementara.");
+    }
+
+    public function restore(int $id)
+    {
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Hanya Administrator yang berwenang memulihkan akun anggota.');
+        }
+
+        $user = User::onlyTrashed()->findOrFail($id);
+        $user->restore();
+
+        return back()->with('success', "Akun {$user->name} berhasil dipulihkan.");
     }
 
     public function exportCsv(Request $request): StreamedResponse

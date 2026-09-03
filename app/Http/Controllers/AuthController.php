@@ -12,7 +12,7 @@ class AuthController extends Controller
     public function showLoginForm()
     {
         if (Auth::check()) {
-            return Auth::user()->role === 'admin'
+            return (Auth::user()->isAdmin() || Auth::user()->isStaff())
                 ? redirect()->route('admin.dashboard')
                 : redirect()->route('member.dashboard');
         }
@@ -27,10 +27,17 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
+        // Cek apakah akun dinonaktifkan (soft-deleted)
+        if (User::onlyTrashed()->where('email', $credentials['email'])->exists()) {
+            return back()->withErrors([
+                'email' => 'Akun ini telah dinonaktifkan oleh Pengurus IKMAS AI. Silakan hubungi Administrator untuk informasi lebih lanjut.',
+            ])->onlyInput('email');
+        }
+
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            if (Auth::user()->role === 'admin') {
+            if (Auth::user()->isAdmin() || Auth::user()->isStaff()) {
                 return redirect()->intended(route('admin.dashboard'));
             }
 

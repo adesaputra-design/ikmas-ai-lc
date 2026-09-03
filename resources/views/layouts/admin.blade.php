@@ -175,6 +175,7 @@
                         <span>Dasbor Utama</span>
                     </a>
 
+                    @if(auth()->user()->hasPermission('materials'))
                     <a href="{{ url('/admin/materi') }}" class="admin-nav-item {{ request()->is('admin/materi*') ? 'active' : '' }}">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
@@ -182,14 +183,18 @@
                         </svg>
                         <span>Kelola Materi</span>
                     </a>
+                    @endif
 
+                    @if(auth()->user()->hasPermission('prompts'))
                     <a href="{{ url('/admin/prompts') }}" class="admin-nav-item {{ request()->is('admin/prompts*') ? 'active' : '' }}">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
                         </svg>
                         <span>Prompt Library</span>
                     </a>
+                    @endif
 
+                    @if(auth()->user()->hasPermission('events'))
                     <a href="{{ url('/admin/agenda') }}" class="admin-nav-item {{ request()->is('admin/agenda*') ? 'active' : '' }}">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -199,7 +204,9 @@
                         </svg>
                         <span>Agenda Kegiatan</span>
                     </a>
+                    @endif
 
+                    @if(auth()->user()->hasPermission('curation'))
                     <a href="{{ url('/admin/curation') }}" class="admin-nav-item {{ request()->is('admin/curation*') ? 'active' : '' }}">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="9 11 12 14 22 4"></polyline>
@@ -207,7 +214,9 @@
                         </svg>
                         <span>Kurasi Showcase</span>
                     </a>
+                    @endif
 
+                    @if(auth()->user()->hasPermission('alumni'))
                     <a href="{{ url('/admin/alumni') }}" class="admin-nav-item {{ request()->is('admin/alumni*') ? 'active' : '' }}">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -217,7 +226,9 @@
                         </svg>
                         <span>Member Alumni</span>
                     </a>
+                    @endif
 
+                    @if(auth()->user()->hasPermission('pages'))
                     <a href="{{ url('/admin/tentang') }}" class="admin-nav-item {{ request()->is('admin/tentang*') ? 'active' : '' }}">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="10"></circle>
@@ -226,6 +237,22 @@
                         </svg>
                         <span>Halaman Tentang</span>
                     </a>
+                    @endif
+
+                    @if(auth()->user()->isAdmin())
+                    <div style="margin: 0.75rem 0 0.25rem 0; padding: 0 0.5rem; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">
+                        Super Admin
+                    </div>
+                    <a href="{{ url('/admin/team') }}" class="admin-nav-item {{ request()->is('admin/team*') ? 'active' : '' }}" style="background: rgba(37,99,235,0.05); border: 1px dashed rgba(37,99,235,0.3);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        <span style="font-weight: 700; color: var(--primary);">Kelola Tim & Staf</span>
+                    </a>
+                    @endif
                 </nav>
             </div>
 
@@ -237,11 +264,16 @@
                         {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
                     </div>
                     <div style="overflow: hidden; flex: 1;">
-                        <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-main); white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
-                            {{ auth()->user()->name ?? 'Pengurus' }}
+                        <div style="display: flex; align-items: center; gap: 0.35rem;">
+                            <span style="font-weight: 700; font-size: 0.85rem; color: var(--text-main); white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
+                                {{ auth()->user()->name ?? 'Pengurus' }}
+                            </span>
                         </div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
-                            {{ auth()->user()->email ?? 'admin@ikmas.ai' }}
+                        <div style="display: flex; align-items: center; gap: 0.35rem; margin-top: 0.15rem;">
+                            @php $badge = auth()->user()->role_badge ?? ['label' => 'Pengurus', 'class' => 'badge-primary']; @endphp
+                            <span class="badge {{ $badge['class'] }}" style="font-size: 0.65rem; padding: 0.1rem 0.35rem;">
+                                {{ $badge['label'] }}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -297,6 +329,17 @@
                             <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
                         <span style="font-weight: 600;">{{ session('success') }}</span>
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 1.5rem; color: #ef4444; display: flex; align-items: center; gap: 0.75rem;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <span style="font-weight: 600;">{{ session('error') }}</span>
                     </div>
                 @endif
 
