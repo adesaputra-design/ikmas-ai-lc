@@ -44,6 +44,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/dashboard', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
     Route::resource('materi', \App\Http\Controllers\Admin\AdminLearningMaterialController::class);
     Route::resource('prompts', \App\Http\Controllers\Admin\AdminPromptController::class);
+    Route::resource('agenda', \App\Http\Controllers\Admin\AdminEventController::class);
+    Route::get('agenda/{agenda}/broadcast-text', [\App\Http\Controllers\Admin\AdminEventController::class, 'getBroadcastText'])->name('agenda.broadcast');
     Route::post('/curation/{showcase}/approve', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'approveShowcase'])->name('curation.approve');
     Route::post('/curation/{showcase}/reject', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'rejectShowcase'])->name('curation.reject');
 });
