@@ -64,37 +64,74 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    public function showRegisterForm()
+    public function showAlumniRegisterForm()
     {
         if (Auth::check()) {
             return redirect()->route('member.dashboard');
         }
 
-        return view('auth.register');
+        return view('auth.register-alumni');
     }
 
-    public function register(Request $request)
+    public function registerAlumni(Request $request)
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'name'            => ['required', 'string', 'max:255'],
+            'email'           => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password'        => ['required', 'string', 'min:8', 'confirmed'],
             'whatsapp_number' => ['required', 'string', 'max:25'],
-            'alumni_year' => ['required', 'string', 'max:10'],
+            'alumni_year'     => ['required', 'string', 'max:10'],
         ]);
 
         $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
+            'name'            => $validated['name'],
+            'email'           => $validated['email'],
+            'password'        => Hash::make($validated['password']),
             'whatsapp_number' => $validated['whatsapp_number'],
-            'alumni_year' => $validated['alumni_year'],
-            'role' => 'member',
+            'alumni_year'     => $validated['alumni_year'],
+            'role'            => 'member',
+            'status'          => 'active',
         ]);
 
         Auth::login($user);
 
         return redirect()->route('member.dashboard')->with('success', 'Selamat datang di IKMAS AI! Akun alumni berhasil dibuat.');
+    }
+
+    public function showSubscriberRegisterForm()
+    {
+        if (Auth::check()) {
+            return redirect()->route('member.dashboard');
+        }
+
+        return view('auth.register-subscriber');
+    }
+
+    public function registerSubscriber(Request $request)
+    {
+        $validated = $request->validate([
+            'name'            => ['required', 'string', 'max:255'],
+            'email'           => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password'        => ['required', 'string', 'min:8', 'confirmed'],
+            'whatsapp_number' => ['required', 'string', 'max:25'],
+        ]);
+
+        User::create([
+            'name'            => $validated['name'],
+            'email'           => $validated['email'],
+            'password'        => Hash::make($validated['password']),
+            'whatsapp_number' => $validated['whatsapp_number'],
+            'role'            => 'subscriber',
+            'status'          => 'pending',
+        ]);
+
+        // Tidak login otomatis — tunggu approval admin
+        return redirect()->route('register.subscriber.pending');
+    }
+
+    public function subscriberPending()
+    {
+        return view('auth.subscriber-pending');
     }
 
     public function logout(Request $request)

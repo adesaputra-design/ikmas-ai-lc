@@ -28,10 +28,17 @@ Route::get('/tentang', [\App\Http\Controllers\TentangController::class, 'index']
 
 
 // Auth Routes
+Route::redirect('/register', '/register/alumni', 301);
+
+Route::get('/register/alumni', [AuthController::class, 'showAlumniRegisterForm'])->name('register.alumni');
+Route::post('/register/alumni', [AuthController::class, 'registerAlumni'])->name('register.alumni.submit');
+
+Route::get('/register/subscriber', [AuthController::class, 'showSubscriberRegisterForm'])->name('register.subscriber');
+Route::post('/register/subscriber', [AuthController::class, 'registerSubscriber'])->name('register.subscriber.submit');
+Route::get('/register/subscriber/pending', [AuthController::class, 'subscriberPending'])->name('register.subscriber.pending');
+
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
-Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
-Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Member Routes (Authenticated)

@@ -120,4 +120,59 @@ class SubscriberTest extends TestCase
         $response->assertRedirect(route('member.dashboard'));
         $this->assertAuthenticatedAs($member);
     }
+
+    // --- Task 3: Registration flows ---
+
+    public function test_alumni_can_register_at_new_route(): void
+    {
+        $response = $this->post('/register/alumni', [
+            'name'                  => 'Ahmad Rizki',
+            'email'                 => 'rizki@alumni.test',
+            'password'              => 'password123',
+            'password_confirmation' => 'password123',
+            'whatsapp_number'       => '081234567890',
+            'alumni_year'           => '2016',
+        ]);
+
+        $response->assertRedirect(route('member.dashboard'));
+        $this->assertDatabaseHas('users', [
+            'email'  => 'rizki@alumni.test',
+            'role'   => 'member',
+            'status' => 'active',
+        ]);
+    }
+
+    public function test_subscriber_can_register(): void
+    {
+        $response = $this->post('/register/subscriber', [
+            'name'                  => 'Budi Santoso',
+            'email'                 => 'budi@publik.test',
+            'password'              => 'password123',
+            'password_confirmation' => 'password123',
+            'whatsapp_number'       => '082345678901',
+        ]);
+
+        $response->assertRedirect(route('register.subscriber.pending'));
+        $this->assertDatabaseHas('users', [
+            'email'  => 'budi@publik.test',
+            'role'   => 'subscriber',
+            'status' => 'pending',
+        ]);
+        $this->assertGuest();
+    }
+
+    public function test_register_old_route_redirects_to_alumni(): void
+    {
+        $response = $this->get('/register');
+
+        $response->assertRedirect('/register/alumni');
+    }
+
+    public function test_subscriber_pending_page_is_accessible(): void
+    {
+        $response = $this->get('/register/subscriber/pending');
+
+        $response->assertStatus(200);
+        $response->assertSee('Pendaftaran');
+    }
 }

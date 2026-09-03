@@ -15,7 +15,7 @@ class MemberAndShowcaseTest extends TestCase
 
     public function test_alumni_can_register_with_whatsapp_and_alumni_year(): void
     {
-        $response = $this->post('/register', [
+        $response = $this->post('/register/alumni', [
             'name' => 'Ahmad Alumni',
             'email' => 'ahmad@alumni.test',
             'password' => 'password123',
