@@ -19,14 +19,8 @@
     <!-- Navbar -->
     <header class="navbar">
         <div class="container nav-container">
-            <a href="{{ url('/') }}" class="nav-brand">
-                <div class="brand-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-                        <path d="M2 17l10 5 10-5"></path>
-                        <path d="M2 12l10 5 10-5"></path>
-                    </svg>
-                </div>
+            <a href="{{ url('/') }}" class="nav-brand" style="display: flex; align-items: center; gap: 0.75rem;">
+                <img src="{{ asset('images/ikmas-logo.png') }}" alt="Logo Resmi IKMAS" class="brand-logo-img">
                 <div class="brand-text">
                     <span class="brand-title">IKMAS <span class="text-gradient">AI</span></span>
                     <span class="brand-subtitle">Learning Center</span>
@@ -53,6 +47,12 @@
                         </svg>
                     </span>
                 </button>
+
+                <!-- Link Portal Pusat IKMAS -->
+                <a href="https://m.ikmas.com/" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; border-color: var(--primary-border); color: var(--primary);" title="Kunjungi Portal Pusat Ikatan Alumni Ma'had Assalaam">
+                    <span>Portal IKMAS</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                </a>
                 
                 @auth
                     @if(auth()->user()->role === 'admin')
@@ -91,22 +91,17 @@
         <div class="container">
             <div class="footer-grid">
                 <div>
-                    <div class="nav-brand" style="margin-bottom: 0.5rem;">
-                        <div class="brand-icon" style="width: 2rem; height: 2rem;">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-                                <path d="M2 17l10 5 10-5"></path>
-                                <path d="M2 12l10 5 10-5"></path>
-                            </svg>
-                        </div>
-                        <span class="brand-title">IKMAS <span class="text-gradient">AI</span></span>
-                    </div>
+                    <a href="https://m.ikmas.com/" target="_blank" rel="noopener" style="display: inline-block; margin-bottom: 1rem;" title="Kunjungi Portal Pusat IKMAS">
+                        <img src="{{ asset('images/ikmas-logo.png') }}" alt="Logo Resmi IKMAS" style="height: 3rem; width: auto; object-fit: contain;">
+                    </a>
                     <p class="footer-brand-desc">
-                        Ruang belajar dan kolaborasi Artificial Intelligence bagi alumni Assalaam. Dari pemula hingga praktisi.
+                        Ruang belajar dan kolaborasi Artificial Intelligence resmi bagi alumni Assalaam. Wadah inovasi alumni dari pemula hingga praktisi global.
                     </p>
-                    <p style="font-size: 0.85rem; font-style: italic; color: var(--primary); margin-top: 0.75rem; font-weight: 600;">
-                        "Belajar AI. Berbagi. Bertumbuh Bersama."
-                    </p>
+                    <div style="margin-top: 0.85rem;">
+                        <a href="https://m.ikmas.com/" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; color: var(--primary); font-weight: 700;">
+                            Portal Pusat: m.ikmas.com ↗
+                        </a>
+                    </div>
                 </div>
                 
                 <div>

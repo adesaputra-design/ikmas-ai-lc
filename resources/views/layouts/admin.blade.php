@@ -153,13 +153,7 @@
                 <!-- Brand Header -->
                 <div class="admin-sidebar-header">
                     <a href="{{ url('/admin/dashboard') }}" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
-                        <div class="brand-icon" style="width: 2.25rem; height: 2.25rem;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-                                <path d="M2 17l10 5 10-5"></path>
-                                <path d="M2 12l10 5 10-5"></path>
-                            </svg>
-                        </div>
+                        <img src="{{ asset('images/ikmas-logo.png') }}" alt="Logo Resmi IKMAS" style="height: 2.35rem; width: auto; object-fit: contain;">
                         <div>
                             <div style="font-weight: 800; font-size: 1.15rem; color: var(--text-main); line-height: 1.1;">
                                 IKMAS <span class="text-gradient">AI</span>
