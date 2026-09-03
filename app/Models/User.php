@@ -22,6 +22,7 @@ class User extends Authenticatable
         'alumni_year',
         'bio',
         'role',
+        'status',
         'permissions',
         'avatar',
     ];
@@ -55,6 +56,26 @@ class User extends Authenticatable
         return $this->role === 'member';
     }
 
+    public function isSubscriber(): bool
+    {
+        return $this->role === 'subscriber';
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === 'pending';
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->status === 'rejected';
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
+
     public function hasPermission(string $permission): bool
     {
         if ($this->isAdmin()) {
@@ -71,9 +92,10 @@ class User extends Authenticatable
     public function getRoleBadgeAttribute(): array
     {
         return match ($this->role) {
-            'admin' => ['label' => 'Administrator', 'class' => 'badge-primary'],
-            'staff' => ['label' => 'Staf Pengurus', 'class' => 'badge-cyan'],
-            default => ['label' => 'Member Alumni', 'class' => 'badge-emerald'],
+            'admin'      => ['label' => 'Administrator', 'class' => 'badge-primary'],
+            'staff'      => ['label' => 'Staf Pengurus', 'class' => 'badge-cyan'],
+            'subscriber' => ['label' => 'Subscriber',    'class' => 'badge-amber'],
+            default      => ['label' => 'Member Alumni', 'class' => 'badge-emerald'],
         };
     }
 
