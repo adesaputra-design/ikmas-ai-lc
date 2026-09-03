@@ -103,4 +103,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::delete('/alumni/{user}', [\App\Http\Controllers\Admin\AdminAlumniController::class, 'destroy'])->name('alumni.destroy');
         Route::post('/alumni/{id}/restore', [\App\Http\Controllers\Admin\AdminAlumniController::class, 'restore'])->name('alumni.restore');
     });
+
+    // Modul Subscriber
+    Route::middleware('permission:subscribers')->group(function () {
+        Route::get('/subscribers', [\App\Http\Controllers\Admin\AdminSubscriberController::class, 'index'])->name('subscribers.index');
+        Route::post('/subscribers/{user}/approve', [\App\Http\Controllers\Admin\AdminSubscriberController::class, 'approve'])->name('subscribers.approve');
+        Route::post('/subscribers/{user}/reject', [\App\Http\Controllers\Admin\AdminSubscriberController::class, 'reject'])->name('subscribers.reject');
+        Route::delete('/subscribers/{user}', [\App\Http\Controllers\Admin\AdminSubscriberController::class, 'destroy'])->name('subscribers.destroy');
+    });
 });
+

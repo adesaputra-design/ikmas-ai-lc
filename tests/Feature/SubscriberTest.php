@@ -217,5 +217,78 @@ class SubscriberTest extends TestCase
 
         $response->assertStatus(200);
     }
+
+    // --- Task 5: Admin Subscriber Management ---
+
+    public function test_admin_can_approve_subscriber(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'status' => 'active']);
+        $subscriber = User::factory()->create([
+            'role'   => 'subscriber',
+            'status' => 'pending',
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->post("/admin/subscribers/{$subscriber->id}/approve");
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+        $this->assertEquals('active', $subscriber->fresh()->status);
+    }
+
+    public function test_admin_can_reject_subscriber(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'status' => 'active']);
+        $subscriber = User::factory()->create([
+            'role'   => 'subscriber',
+            'status' => 'pending',
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->post("/admin/subscribers/{$subscriber->id}/reject");
+
+        $response->assertRedirect();
+        $response->assertSessionHas('info');
+        $this->assertEquals('rejected', $subscriber->fresh()->status);
+    }
+
+    public function test_admin_can_view_subscriber_list(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'status' => 'active']);
+        User::factory()->create([
+            'role'   => 'subscriber',
+            'status' => 'pending',
+        ]);
+
+        $response = $this->actingAs($admin)->get('/admin/subscribers');
+
+        $response->assertStatus(200);
+        $response->assertSee('Kelola Subscriber');
+    }
+
+    public function test_non_admin_cannot_access_subscriber_module(): void
+    {
+        $member = User::factory()->create(['role' => 'member', 'status' => 'active']);
+
+        $response = $this->actingAs($member)->get('/admin/subscribers');
+
+        $response->assertStatus(403);
+    }
+
+    public function test_admin_can_delete_subscriber(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'status' => 'active']);
+        $subscriber = User::factory()->create([
+            'role'   => 'subscriber',
+            'status' => 'rejected',
+        ]);
+
+        $response = $this->actingAs($admin)->delete("/admin/subscribers/{$subscriber->id}");
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+        $this->assertSoftDeleted('users', ['id' => $subscriber->id]);
+    }
 }
+
 

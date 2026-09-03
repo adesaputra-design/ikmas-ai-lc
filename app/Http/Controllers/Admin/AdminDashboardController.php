@@ -21,6 +21,7 @@ class AdminDashboardController extends Controller
             'total_events' => Event::count(),
             'pending_curation' => Showcase::where('status', 'pending')->count(),
             'approved_showcases' => Showcase::where('status', 'approved')->count(),
+            'pending_subscribers' => User::where('role', 'subscriber')->where('status', 'pending')->count(),
         ];
 
         $pendingShowcases = Showcase::with('user')
