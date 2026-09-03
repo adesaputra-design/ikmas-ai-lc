@@ -60,7 +60,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const navLinks = document.getElementById('nav-links');
     if (mobileBtn && navLinks) {
         mobileBtn.addEventListener('click', () => {
-            navLinks.classList.toggle('open');
+            const isOpen = navLinks.classList.toggle('open');
+            mobileBtn.setAttribute('aria-expanded', isOpen);
+            if (isOpen) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Close drawer when clicking any link inside
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('open');
+                document.body.style.overflow = '';
+            });
         });
     }
 });
