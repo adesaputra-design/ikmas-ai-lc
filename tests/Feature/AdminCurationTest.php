@@ -44,7 +44,7 @@ class AdminCurationTest extends TestCase
         $response = $this->actingAs($admin)->get('/admin/dashboard');
 
         $response->assertStatus(200);
-        $response->assertSee('Panel Pengurus & Kurasi IKMAS AI', false);
+        $response->assertSee('Panel Pengurus');
         $response->assertSee('Total Member');
         $response->assertSee('Menunggu Kurasi');
     }

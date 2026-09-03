@@ -1,155 +1,163 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('title', 'Panel Pengurus & Kurasi — IKMAS AI Learning Center')
+@section('title', 'Dasbor Pengurus — IKMAS AI')
+@section('page-title', 'Dasbor Utama Pengurus')
 
 @section('content')
-<div class="container" style="padding-top: 3rem; padding-bottom: 5rem;">
-    <!-- Flash Messages -->
-    @if(session('success'))
-        <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 2rem; color: #10b981; display: flex; align-items: center; gap: 0.75rem;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-            <span style="font-weight: 600;">{{ session('success') }}</span>
+<!-- Welcome & Quick Actions Bar -->
+<div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 1.75rem 2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+    <div>
+        <div style="font-size: 0.85rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 0.25rem;">
+            Pusat Komando Komunitas
         </div>
-    @endif
-
-    @if(session('info'))
-        <div style="background: rgba(14,165,233,0.1); border: 1px solid rgba(14,165,233,0.3); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 2rem; color: #0ea5e9; display: flex; align-items: center; gap: 0.75rem;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="16" x2="12" y2="12"></line>
-                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-            </svg>
-            <span style="font-weight: 600;">{{ session('info') }}</span>
-        </div>
-    @endif
-
-    <!-- Admin Header -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem;">
-        <div>
-            <span class="badge badge-primary" style="margin-bottom: 0.5rem;">Ruang Kerja Administrator</span>
-            <h1 style="font-size: 2.25rem; font-weight: 800; letter-spacing: -0.02em;">Panel Pengurus & Kurasi IKMAS AI</h1>
-            <p style="color: var(--text-muted); font-size: 0.95rem;">
-                Kelola konten, moderasi submisi karya alumni, dan pantau pertumbuhan komunitas.
-            </p>
-        </div>
-        <div style="display: flex; gap: 0.5rem;">
-            <a href="{{ url('/showcase') }}" class="btn btn-secondary btn-sm" target="_blank">Lihat Web Publik ↗</a>
-        </div>
+        <h1 style="font-size: 1.75rem; font-weight: 800; margin: 0; line-height: 1.2;">
+            Selamat Datang, {{ auth()->user()->name }}! 👋
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.35rem 0 0 0;">
+            Kelola pembelajaran, pantau aktivitas alumni, dan moderasi konten dalam satu tempat.
+        </p>
     </div>
 
-    <!-- Metrics Grid -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 3.5rem;">
-        <div class="card" style="padding: 1.25rem;">
-            <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">
-                Total Member
-            </div>
-            <div style="font-size: 2rem; font-weight: 800; color: var(--primary);">
-                {{ $metrics['total_members'] }}
-            </div>
-            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Alumni terdaftar</div>
+    <div>
+        <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem;">
+            Aksi Cepat Pengurus
         </div>
-
-        <div class="card" style="padding: 1.25rem; border-left: 4px solid var(--accent-amber);">
-            <div style="font-size: 0.8rem; font-weight: 700; color: var(--accent-amber); text-transform: uppercase; margin-bottom: 0.5rem;">
-                Menunggu Kurasi
-            </div>
-            <div style="font-size: 2rem; font-weight: 800; color: var(--accent-amber);">
-                {{ $metrics['pending_curation'] }}
-            </div>
-            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Submisi karya baru</div>
-        </div>
-
-        <div class="card" style="padding: 1.25rem;">
-            <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">
-                Karya Tayang
-            </div>
-            <div style="font-size: 2rem; font-weight: 800; color: var(--accent-emerald);">
-                {{ $metrics['approved_showcases'] }}
-            </div>
-            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Di etalase publik</div>
-        </div>
-
-        <div class="card" style="padding: 1.25rem;">
-            <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">
-                Materi Belajar
-            </div>
-            <div style="font-size: 2rem; font-weight: 800; color: var(--text-main);">
-                {{ $metrics['total_materials'] }}
-            </div>
-            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Modul aktif</div>
-        </div>
-
-        <div class="card" style="padding: 1.25rem;">
-            <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">
-                Prompt Library
-            </div>
-            <div style="font-size: 2rem; font-weight: 800; color: var(--text-main);">
-                {{ $metrics['total_prompts'] }}
-            </div>
-            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Koleksi siap pakai</div>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <a href="{{ url('/admin/materi/create') }}" class="btn btn-primary btn-sm">
+                + Materi Baru
+            </a>
+            <a href="{{ url('/admin/prompts/create') }}" class="btn btn-secondary btn-sm">
+                + Tambah Prompt
+            </a>
+            <a href="{{ url('/admin/agenda/create') }}" class="btn btn-secondary btn-sm">
+                + Jadwalkan Event
+            </a>
+            <a href="{{ url('/admin/curation') }}" class="btn btn-secondary btn-sm" style="border-color: var(--accent-amber); color: var(--accent-amber);">
+                Tinjau Kurasi ({{ $metrics['pending_curation'] }})
+            </a>
         </div>
     </div>
+</div>
 
-    <!-- Pending Curation Queue Section -->
-    <div style="margin-bottom: 4rem;">
-        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
-            <span class="badge badge-amber">Antrean Moderasi</span>
-            <h2 style="font-size: 1.5rem; font-weight: 800;">Submisi Karya Alumni yang Menunggu Kurasi</h2>
+<!-- Metrics Grid -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 2.5rem;">
+    <div class="card" style="padding: 1.25rem;">
+        <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">
+            Total Member
+        </div>
+        <div style="font-size: 2rem; font-weight: 800; color: var(--primary);">
+            {{ $metrics['total_members'] }}
+        </div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Alumni terdaftar</div>
+    </div>
+
+    <div class="card" style="padding: 1.25rem; border-left: 4px solid var(--accent-amber);">
+        <div style="font-size: 0.8rem; font-weight: 700; color: var(--accent-amber); text-transform: uppercase; margin-bottom: 0.5rem;">
+            Menunggu Kurasi
+        </div>
+        <div style="font-size: 2rem; font-weight: 800; color: var(--accent-amber);">
+            {{ $metrics['pending_curation'] }}
+        </div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Submisi karya baru</div>
+    </div>
+
+    <div class="card" style="padding: 1.25rem;">
+        <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">
+            Karya Tayang
+        </div>
+        <div style="font-size: 2rem; font-weight: 800; color: var(--accent-emerald);">
+            {{ $metrics['approved_showcases'] }}
+        </div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Di etalase publik</div>
+    </div>
+
+    <div class="card" style="padding: 1.25rem;">
+        <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">
+            Materi Belajar
+        </div>
+        <div style="font-size: 2rem; font-weight: 800; color: var(--text-main);">
+            {{ $metrics['total_materials'] }}
+        </div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Modul aktif</div>
+    </div>
+
+    <div class="card" style="padding: 1.25rem;">
+        <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem;">
+            Prompt Library
+        </div>
+        <div style="font-size: 2rem; font-weight: 800; color: var(--text-main);">
+            {{ $metrics['total_prompts'] }}
+        </div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Koleksi siap pakai</div>
+    </div>
+</div>
+
+<!-- 2-Column Split: Top Prompts Leaderboard & Moderation Queue -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 2rem; margin-bottom: 2.5rem;">
+    <!-- Top Copied Prompts Leaderboard -->
+    <div class="card" style="padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+            <div>
+                <h2 style="font-size: 1.15rem; font-weight: 800; margin: 0;">🔥 Prompt Paling Populer</h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.2rem 0 0 0;">Instruksi yang paling sering disalin alumni</p>
+            </div>
+            <a href="{{ url('/admin/prompts') }}" class="btn btn-secondary btn-sm" style="font-size: 0.75rem;">Semua Prompt →</a>
+        </div>
+
+        @if($topPrompts->count() > 0)
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                @foreach($topPrompts as $idx => $p)
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: var(--bg-surface-alt); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; overflow: hidden;">
+                            <div style="width: 1.75rem; height: 1.75rem; border-radius: 50%; background: {{ $idx === 0 ? '#f59e0b' : ($idx === 1 ? '#94a3b8' : ($idx === 2 ? '#b45309' : 'var(--primary)')) }}; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 800; flex-shrink: 0;">
+                                {{ $idx + 1 }}
+                            </div>
+                            <div style="overflow: hidden;">
+                                <div style="font-weight: 700; font-size: 0.9rem; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
+                                    {{ $p->title }}
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">
+                                    {{ $p->target_role }} &bull; {{ $p->target_tool }}
+                                </div>
+                            </div>
+                        </div>
+                        <span class="badge badge-primary" style="flex-shrink: 0; font-size: 0.75rem;">
+                            {{ $p->copy_count }}x disalin
+                        </span>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <p style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 2rem 0;">Belum ada data salin prompt.</p>
+        @endif
+    </div>
+
+    <!-- Quick Curation Card -->
+    <div class="card" style="padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+            <div>
+                <h2 style="font-size: 1.15rem; font-weight: 800; margin: 0;">⏳ Antrean Kurasi Karya</h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.2rem 0 0 0;">Karya alumni yang menunggu validasi</p>
+            </div>
+            <a href="{{ url('/admin/curation') }}" class="btn btn-secondary btn-sm" style="font-size: 0.75rem;">Lihat Antrean →</a>
         </div>
 
         @if($pendingShowcases->count() > 0)
-            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                @foreach($pendingShowcases as $p)
-                    <div class="card card-elevated" style="border-left: 4px solid var(--accent-amber); padding: 1.75rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
-                            <div>
-                                <span class="badge badge-amber" style="margin-bottom: 0.5rem;">Menunggu Review</span>
-                                <h3 style="font-size: 1.35rem; font-weight: 800; line-height: 1.3;">{{ $p->title }}</h3>
-                                <div style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem;">
-                                    Diajukan oleh: <strong>{{ $p->user->name ?? 'Member' }}</strong> (Alumni Angkatan {{ $p->user->alumni_year ?? '-' }}) &bull; WA: {{ $p->user->whatsapp_number ?? '-' }}
-                                </div>
-                            </div>
-                            <span class="badge badge-cyan">🛠 {{ $p->tools_used }}</span>
+            <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                @foreach($pendingShowcases->take(3) as $p)
+                    <div style="padding: 1rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface-alt);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.35rem;">
+                            <h4 style="font-size: 0.95rem; font-weight: 700; margin: 0;">{{ $p->title }}</h4>
+                            <span class="badge badge-amber" style="font-size: 0.7rem;">Pending</span>
                         </div>
-
-                        <div style="font-size: 0.95rem; color: var(--text-main); line-height: 1.7; margin-bottom: 1rem; background: var(--bg-surface-alt); padding: 1rem; border-radius: var(--radius-md);">
-                            <strong>Deskripsi Proyek:</strong>
-                            <p style="margin-top: 0.25rem; margin-bottom: 0; white-space: pre-line;">{{ $p->description }}</p>
-
-                            @if($p->impact_story)
-                                <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border-color); color: var(--accent-emerald);">
-                                    <strong>Cerita Dampak:</strong> {{ $p->impact_story }}
-                                </div>
-                            @endif
-
-                            @if($p->project_url)
-                                <div style="margin-top: 0.5rem;">
-                                    <a href="{{ $p->project_url }}" target="_blank" rel="noopener" style="color: var(--primary); font-size: 0.85rem; font-weight: 600;">
-                                        Kunjungi Link Proyek ↗
-                                    </a>
-                                </div>
-                            @endif
-                        </div>
-
-                        <!-- Curation Actions -->
-                        <div style="display: flex; gap: 1rem; justify-content: flex-end; align-items: center; border-top: 1px solid var(--border-color); padding-top: 1rem; flex-wrap: wrap;">
-                            <!-- Reject Form -->
-                            <form method="POST" action="{{ url('/admin/curation/' . $p->id . '/reject') }}" style="display: flex; gap: 0.5rem; align-items: center;">
-                                @csrf
-                                <input type="text" name="admin_notes" placeholder="Catatan revisi untuk member..." 
-                                       style="padding: 0.4rem 0.75rem; font-size: 0.85rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); color: var(--text-main); width: 250px;">
-                                <button type="submit" class="btn btn-secondary btn-sm" style="color: #ef4444; border-color: rgba(239,68,68,0.3);">
-                                    Tolak / Revisi
-                                </button>
-                            </form>
-
-                            <!-- Approve Form -->
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                            Oleh: {{ $p->user->name ?? 'Member' }} (Angkatan {{ $p->user->alumni_year ?? '-' }})
+                        </p>
+                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
                             <form method="POST" action="{{ url('/admin/curation/' . $p->id . '/approve') }}">
                                 @csrf
-                                <button type="submit" class="btn btn-whatsapp btn-sm">
-                                    ✓ Setujui & Publikasikan
+                                <button type="submit" class="btn btn-whatsapp btn-sm" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                                    ✓ Setujui
                                 </button>
                             </form>
                         </div>
@@ -157,53 +165,53 @@
                 @endforeach
             </div>
         @else
-            <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
-                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🎉</div>
-                <h4 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.25rem;">Semua Bersih!</h4>
-                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0;">Tidak ada submisi karya alumni yang menunggu kurasi saat ini.</p>
+            <div style="text-align: center; padding: 2.5rem 1rem;">
+                <div style="font-size: 2rem; margin-bottom: 0.25rem;">✨</div>
+                <div style="font-weight: 700; font-size: 0.95rem;">Semua Karya Bersih</div>
+                <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0.25rem 0 0 0;">Tidak ada submisi karya yang tertunda.</p>
             </div>
         @endif
     </div>
+</div>
 
-    <!-- Recent Approved Showcases Section -->
-    <div>
-        <h2 style="font-size: 1.35rem; font-weight: 800; margin-bottom: 1.25rem;">Riwayat Kurasi Terbaru</h2>
-        @if($recentShowcases->count() > 0)
-            <div class="card" style="padding: 0; overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: left;">
-                    <thead>
-                        <tr style="background: var(--bg-surface-alt); border-bottom: 1px solid var(--border-color);">
-                            <th style="padding: 0.875rem 1.25rem; font-weight: 700;">Judul Karya</th>
-                            <th style="padding: 0.875rem 1.25rem; font-weight: 700;">Kreator</th>
-                            <th style="padding: 0.875rem 1.25rem; font-weight: 700;">Status</th>
-                            <th style="padding: 0.875rem 1.25rem; font-weight: 700;">Tanggal</th>
+<!-- Recent Curation History -->
+<div>
+    <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 1rem;">Riwayat Kurasi Terbaru</h3>
+    @if($recentShowcases->count() > 0)
+        <div class="card" style="padding: 0; overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: left;">
+                <thead>
+                    <tr style="background: var(--bg-surface-alt); border-bottom: 1px solid var(--border-color);">
+                        <th style="padding: 0.875rem 1.25rem; font-weight: 700;">Judul Karya</th>
+                        <th style="padding: 0.875rem 1.25rem; font-weight: 700;">Kreator</th>
+                        <th style="padding: 0.875rem 1.25rem; font-weight: 700;">Status</th>
+                        <th style="padding: 0.875rem 1.25rem; font-weight: 700;">Tanggal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($recentShowcases as $rc)
+                        <tr style="border-bottom: 1px solid var(--border-color);">
+                            <td style="padding: 0.875rem 1.25rem; font-weight: 600;">
+                                {{ $rc->title }}
+                            </td>
+                            <td style="padding: 0.875rem 1.25rem; color: var(--text-muted);">
+                                {{ $rc->user->name ?? '-' }} ({{ $rc->user->alumni_year ?? '-' }})
+                            </td>
+                            <td style="padding: 0.875rem 1.25rem;">
+                                <span class="badge badge-{{ $rc->status_color }}">
+                                    {{ $rc->status_label }}
+                                </span>
+                            </td>
+                            <td style="padding: 0.875rem 1.25rem; color: var(--text-muted); font-size: 0.85rem;">
+                                {{ $rc->updated_at->diffForHumans() }}
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($recentShowcases as $rc)
-                            <tr style="border-bottom: 1px solid var(--border-color);">
-                                <td style="padding: 0.875rem 1.25rem; font-weight: 600;">
-                                    {{ $rc->title }}
-                                </td>
-                                <td style="padding: 0.875rem 1.25rem; color: var(--text-muted);">
-                                    {{ $rc->user->name ?? '-' }} ({{ $rc->user->alumni_year ?? '-' }})
-                                </td>
-                                <td style="padding: 0.875rem 1.25rem;">
-                                    <span class="badge badge-{{ $rc->status_color }}">
-                                        {{ $rc->status_label }}
-                                    </span>
-                                </td>
-                                <td style="padding: 0.875rem 1.25rem; color: var(--text-muted); font-size: 0.85rem;">
-                                    {{ $rc->updated_at->diffForHumans() }}
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @else
-            <p style="color: var(--text-muted); font-size: 0.9rem;">Belum ada riwayat kurasi.</p>
-        @endif
-    </div>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    @else
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Belum ada riwayat kurasi.</p>
+    @endif
 </div>
 @endsection

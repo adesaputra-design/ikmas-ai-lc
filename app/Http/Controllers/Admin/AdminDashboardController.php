@@ -34,7 +34,11 @@ class AdminDashboardController extends Controller
             ->take(5)
             ->get();
 
-        return view('admin.dashboard', compact('metrics', 'pendingShowcases', 'recentShowcases'));
+        $topPrompts = Prompt::orderBy('copy_count', 'desc')
+            ->take(5)
+            ->get();
+
+        return view('admin.dashboard', compact('metrics', 'pendingShowcases', 'recentShowcases', 'topPrompts'));
     }
 
     public function approveShowcase(Showcase $showcase)
