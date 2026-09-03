@@ -60,15 +60,15 @@ class NavbarAestheticAndResponsiveTest extends TestCase
         $response->assertSee('offcanvas-auth');
     }
 
-    public function test_landing_logo_uses_responsive_css_classes_instead_of_inline_dimensions(): void
+    public function test_landing_page_no_longer_renders_extra_hero_logo(): void
     {
         $response = $this->get('/');
 
         $response->assertStatus(200);
-        $response->assertSee('hero-logo-emblem');
-        $response->assertSee('hero-logo-frame');
-        $response->assertSee('hero-logo-img');
-        $response->assertDontSee('max-height: 145px; width: auto; object-fit: contain;', false);
+        $response->assertDontSee('hero-logo-emblem');
+        $response->assertDontSee('hero-logo-frame');
+        $response->assertDontSee('hero-logo-img');
+        $response->assertDontSee('images/ikmas-ai-logo.jpg');
     }
 
     public function test_css_contains_tablet_breakpoint_and_hidden_offcanvas_defaults(): void
@@ -78,8 +78,6 @@ class NavbarAestheticAndResponsiveTest extends TestCase
         $this->assertStringContainsString('@media (max-width: 1024px)', $css);
         $this->assertStringContainsString('.ikmas-offcanvas {', $css);
         $this->assertStringContainsString('transform: translateX(100%);', $css);
-        $this->assertStringContainsString('.hero-logo-img', $css);
-        $this->assertStringContainsString('max-height: 96px;', $css);
     }
 
     public function test_authenticated_user_sees_dashboard_in_navbar_and_mobile_drawer(): void

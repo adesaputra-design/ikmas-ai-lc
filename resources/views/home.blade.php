@@ -8,12 +8,6 @@
     <div class="hero-glow"></div>
     <div class="container">
         <div class="hero-content">
-            <div class="hero-logo-emblem">
-                <div class="hero-logo-frame">
-                    <img src="{{ asset('images/ikmas-ai-logo.jpg') }}" alt="Logo Resmi IKMAS AI Learning Center" class="hero-logo-img">
-                </div>
-            </div>
-            
             <h1 class="hero-title">
                 Belajar AI. Berbagi. <br>
                 <span class="text-gradient">Bertumbuh Bersama.</span>

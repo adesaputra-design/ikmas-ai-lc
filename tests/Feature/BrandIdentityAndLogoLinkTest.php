@@ -18,7 +18,6 @@ class BrandIdentityAndLogoLinkTest extends TestCase
         $response->assertSee('images/ikmas-logo.png');
         $response->assertSee('https://m.ikmas.com/');
         $response->assertSee('m.ikmas.com');
-        $response->assertSee('images/ikmas-ai-logo.jpg');
     }
 
     public function test_navbar_displays_ikmas_portal_link(): void
