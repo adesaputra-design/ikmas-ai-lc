@@ -66,6 +66,49 @@
     </div>
 </section>
 
+<!-- 5 Aktivitas Member Terbaru Section -->
+<section class="activity-feed-section">
+    <div class="container">
+        <div class="activity-feed-header">
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+                <span class="activity-pulse-dot"></span>
+                <h3 class="activity-feed-title">Denyut Komunitas Terkini</h3>
+            </div>
+            <span class="activity-feed-sub">Aktivitas & karya nyata alumni</span>
+        </div>
+
+        @if(isset($recentActivity) && $recentActivity->count() > 0)
+            <div class="activity-grid">
+                @foreach($recentActivity as $act)
+                    <a href="{{ $act['url'] }}" class="activity-card">
+                        <div class="activity-card-top">
+                            <span class="badge {{ $act['badge_class'] }}">{{ $act['badge_label'] }}</span>
+                            <span class="activity-time">
+                                {{ $act['created_at'] ? \Carbon\Carbon::parse($act['created_at'])->diffForHumans() : 'Baru saja' }}
+                            </span>
+                        </div>
+                        <div class="activity-card-body">
+                            <div class="activity-card-title">{{ $act['title'] }}</div>
+                            <div class="activity-card-subtitle">{{ $act['subtitle'] }}</div>
+                        </div>
+                        <div class="activity-card-arrow">
+                            <span>Lihat</span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+        @else
+            <div class="activity-empty-state">
+                <div class="activity-empty-icon">🌱</div>
+                <div class="activity-empty-text">
+                    <strong>Komunitas baru mulai bertumbuh!</strong> Jadilah salah satu yang pertama membagikan karya AI atau bergabung di Study Group.
+                </div>
+            </div>
+        @endif
+    </div>
+</section>
+
 <!-- Next Upcoming Event Announcement -->
 @if(isset($nextEvent))
 <div class="container" style="margin-top: -1.5rem; margin-bottom: 2rem;">

@@ -55,27 +55,131 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 2. Mobile Navigation Toggle
-    const mobileBtn = document.getElementById('mobile-menu-btn');
-    const navLinks = document.getElementById('nav-links');
-    if (mobileBtn && navLinks) {
-        mobileBtn.addEventListener('click', () => {
-            const isOpen = navLinks.classList.toggle('open');
-            mobileBtn.setAttribute('aria-expanded', isOpen);
-            if (isOpen) {
-                document.body.style.overflow = 'hidden';
-            } else {
-                document.body.style.overflow = '';
-            }
-        });
+    // 2. Desktop Dropdowns with 150ms Hover Delay & Click Toggle
+    const dropdowns = document.querySelectorAll('.nav-dropdown');
+    dropdowns.forEach(dropdown => {
+        let timer = null;
+        const btn = dropdown.querySelector('.nav-dropdown-btn');
 
-        // Close drawer when clicking any link inside
-        navLinks.querySelectorAll('a').forEach(link => {
+        const openDropdown = () => {
+            clearTimeout(timer);
+            dropdowns.forEach(d => {
+                if (d !== dropdown) {
+                    d.classList.remove('is-open');
+                    d.querySelector('.nav-dropdown-btn')?.setAttribute('aria-expanded', 'false');
+                }
+            });
+            dropdown.classList.add('is-open');
+            btn?.setAttribute('aria-expanded', 'true');
+        };
+
+        const closeDropdown = () => {
+            timer = setTimeout(() => {
+                dropdown.classList.remove('is-open');
+                btn?.setAttribute('aria-expanded', 'false');
+            }, 150);
+        };
+
+        dropdown.addEventListener('mouseenter', openDropdown);
+        dropdown.addEventListener('mouseleave', closeDropdown);
+
+        if (btn) {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isOpen = dropdown.classList.contains('is-open');
+                if (isOpen) {
+                    dropdown.classList.remove('is-open');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    openDropdown();
+                }
+            });
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.nav-dropdown')) {
+            dropdowns.forEach(d => {
+                d.classList.remove('is-open');
+                d.querySelector('.nav-dropdown-btn')?.setAttribute('aria-expanded', 'false');
+            });
+        }
+    });
+
+    // 3. Mobile Offcanvas (m.ikmas.com Style - Slide from Right)
+    const mobileBtn = document.getElementById('mobile-menu-btn');
+    const offcanvas = document.getElementById('mobileOffcanvas');
+    const backdrop = document.getElementById('offcanvasBackdrop');
+    const closeBtn = document.getElementById('offcanvasCloseBtn');
+
+    function openOffcanvas() {
+        if (!offcanvas) return;
+        offcanvas.classList.add('active');
+        if (backdrop) backdrop.classList.add('active');
+        mobileBtn?.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeOffcanvas() {
+        if (!offcanvas) return;
+        offcanvas.classList.remove('active');
+        if (backdrop) backdrop.classList.remove('active');
+        mobileBtn?.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+    }
+
+    if (mobileBtn) {
+        mobileBtn.addEventListener('click', openOffcanvas);
+    }
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeOffcanvas);
+    }
+    if (backdrop) {
+        backdrop.addEventListener('click', closeOffcanvas);
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && offcanvas && offcanvas.classList.contains('active')) {
+            closeOffcanvas();
+        }
+    });
+
+    // Auto-close offcanvas on navigation click
+    if (offcanvas) {
+        offcanvas.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
-                navLinks.classList.remove('open');
-                document.body.style.overflow = '';
+                closeOffcanvas();
             });
         });
+    }
+
+    // 4. Sticky Header with Scroll Detection (Hide on scroll down, show on scroll up)
+    const navbar = document.querySelector('.navbar');
+    if (navbar) {
+        let lastScrollY = window.scrollY;
+        let ticking = false;
+
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const currentScrollY = window.scrollY;
+                    // Hanya sembunyikan jika offcanvas sedang tidak aktif dan sudah scroll lebih dari 80px
+                    const isOffcanvasOpen = offcanvas && offcanvas.classList.contains('active');
+
+                    if (!isOffcanvasOpen) {
+                        if (currentScrollY > lastScrollY && currentScrollY > 90) {
+                            navbar.classList.add('navbar-hidden');
+                        } else if (currentScrollY < lastScrollY) {
+                            navbar.classList.remove('navbar-hidden');
+                        }
+                    }
+
+                    lastScrollY = Math.max(0, currentScrollY);
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true });
     }
 });
 

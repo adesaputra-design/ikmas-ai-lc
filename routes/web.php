@@ -24,6 +24,9 @@ Route::get('/agenda/{slug}', [EventController::class, 'show'])->name('events.sho
 Route::get('/showcase', [ShowcaseController::class, 'index'])->name('showcase.index');
 Route::get('/showcase/{slug}', [ShowcaseController::class, 'show'])->name('showcase.show');
 
+Route::get('/tentang', [\App\Http\Controllers\TentangController::class, 'index'])->name('tentang');
+
+
 // Auth Routes
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -53,4 +56,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('/curation/{showcase}', [\App\Http\Controllers\Admin\AdminShowcaseCurationController::class, 'destroy'])->name('curation.destroy');
     Route::get('/alumni', [\App\Http\Controllers\Admin\AdminAlumniController::class, 'index'])->name('alumni.index');
     Route::get('/alumni/export', [\App\Http\Controllers\Admin\AdminAlumniController::class, 'exportCsv'])->name('alumni.export');
+    Route::get('/tentang', [\App\Http\Controllers\Admin\AdminTentangController::class, 'index'])->name('tentang.index');
+    Route::post('/tentang', [\App\Http\Controllers\Admin\AdminTentangController::class, 'update'])->name('tentang.update');
 });
