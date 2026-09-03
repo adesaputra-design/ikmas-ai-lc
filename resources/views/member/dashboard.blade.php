@@ -23,14 +23,19 @@
                 <div>
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
                         <h1 style="font-size: 1.75rem; font-weight: 800;">{{ $user->name }}</h1>
-                        <span class="badge badge-primary">Member Alumni</span>
+                        <span class="badge {{ $user->role_badge['class'] }}">{{ $user->role_badge['label'] }}</span>
                     </div>
                     <div style="font-size: 0.9rem; color: var(--text-muted);">
-                        🎓 Alumni Assalaam Angkatan <strong>{{ $user->alumni_year ?? '-' }}</strong> &bull; 📱 {{ $user->whatsapp_number ?? '-' }}
+                        @if($user->isSubscriber())
+                            📱 {{ $user->whatsapp_number ?? '-' }}
+                        @else
+                            🎓 Alumni Assalaam Angkatan <strong>{{ $user->alumni_year ?? '-' }}</strong> &bull; 📱 {{ $user->whatsapp_number ?? '-' }}
+                        @endif
                     </div>
                 </div>
             </div>
 
+            @if(!$user->isSubscriber())
             <div style="display: flex; gap: 0.75rem;">
                 <a href="{{ url('/member/showcase/create') }}" class="btn btn-primary">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -40,9 +45,11 @@
                     <span>Ajukan Karya Baru</span>
                 </a>
             </div>
+            @endif
         </div>
     </div>
 
+    @if(!$user->isSubscriber())
     <!-- My Showcases Section -->
     <div style="margin-bottom: 4rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
@@ -111,6 +118,7 @@
             </div>
         @endif
     </div>
+    @endif
 
     <!-- Bookmarked Prompts Section -->
     <div>

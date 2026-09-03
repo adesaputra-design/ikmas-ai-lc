@@ -31,11 +31,19 @@ class MemberDashboardController extends Controller
 
     public function createShowcase()
     {
+        if (auth()->user()->isSubscriber()) {
+            abort(403, 'Fitur ini hanya tersedia untuk anggota alumni. Subscriber tidak dapat mengajukan showcase.');
+        }
+
         return view('member.showcase-create');
     }
 
     public function storeShowcase(Request $request)
     {
+        if (auth()->user()->isSubscriber()) {
+            abort(403, 'Fitur ini hanya tersedia untuk anggota alumni. Subscriber tidak dapat mengajukan showcase.');
+        }
+
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],

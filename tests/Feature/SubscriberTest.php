@@ -175,4 +175,47 @@ class SubscriberTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Pendaftaran');
     }
+
+    // --- Task 4: Showcase Access Restriction ---
+
+    public function test_active_subscriber_cannot_access_create_showcase_page(): void
+    {
+        $subscriber = User::factory()->create([
+            'role'   => 'subscriber',
+            'status' => 'active',
+        ]);
+
+        $response = $this->actingAs($subscriber)->get('/member/showcase/create');
+
+        $response->assertStatus(403);
+    }
+
+    public function test_active_subscriber_cannot_submit_showcase(): void
+    {
+        $subscriber = User::factory()->create([
+            'role'   => 'subscriber',
+            'status' => 'active',
+        ]);
+
+        $response = $this->actingAs($subscriber)->post('/member/showcase', [
+            'title'       => 'Karya Subscriber',
+            'description' => 'Test showcase dari subscriber',
+            'tools_used'  => 'ChatGPT',
+        ]);
+
+        $response->assertStatus(403);
+    }
+
+    public function test_active_alumni_member_can_access_create_showcase_page(): void
+    {
+        $member = User::factory()->create([
+            'role'   => 'member',
+            'status' => 'active',
+        ]);
+
+        $response = $this->actingAs($member)->get('/member/showcase/create');
+
+        $response->assertStatus(200);
+    }
 }
+
