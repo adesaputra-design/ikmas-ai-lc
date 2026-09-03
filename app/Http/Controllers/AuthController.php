@@ -23,9 +23,24 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'email'    => ['required', 'email'],
             'password' => ['required'],
         ]);
+
+        // Cek apakah akun subscriber masih pending atau ditolak
+        $existingUser = User::where('email', $credentials['email'])->first();
+        if ($existingUser) {
+            if ($existingUser->isPending()) {
+                return back()->withErrors([
+                    'email' => 'Akun Anda masih dalam proses peninjauan oleh Pengurus IKMAS AI. Harap tunggu konfirmasi melalui WhatsApp.',
+                ])->onlyInput('email');
+            }
+            if ($existingUser->isRejected()) {
+                return back()->withErrors([
+                    'email' => 'Pendaftaran Anda tidak dapat disetujui. Silakan hubungi kami untuk informasi lebih lanjut.',
+                ])->onlyInput('email');
+            }
+        }
 
         // Cek apakah akun dinonaktifkan (soft-deleted)
         if (User::onlyTrashed()->where('email', $credentials['email'])->exists()) {
