@@ -8,9 +8,9 @@
     <div class="hero-glow"></div>
     <div class="container">
         <div class="hero-content">
-            <div class="hero-logo-emblem" style="display: flex; justify-content: center; margin-bottom: 2rem;">
-                <div style="background: #ffffff; padding: 0.85rem 1.75rem; border-radius: var(--radius-2xl); box-shadow: 0 12px 36px rgba(0, 104, 55, 0.12); border: 1px solid rgba(0, 104, 55, 0.15); display: inline-flex; align-items: center; justify-content: center; transition: var(--transition);">
-                    <img src="{{ asset('images/ikmas-ai-logo.jpg') }}" alt="Logo Resmi IKMAS AI Learning Center" style="max-height: 145px; width: auto; object-fit: contain;">
+            <div class="hero-logo-emblem">
+                <div class="hero-logo-frame">
+                    <img src="{{ asset('images/ikmas-ai-logo.jpg') }}" alt="Logo Resmi IKMAS AI Learning Center" class="hero-logo-img">
                 </div>
             </div>
             

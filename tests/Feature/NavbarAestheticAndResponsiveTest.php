@@ -10,7 +10,7 @@ class NavbarAestheticAndResponsiveTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_desktop_navbar_renders_clean_brand_and_one_line_menus(): void
+    public function test_desktop_navbar_renders_clean_brand_and_grouped_dropdown_menus(): void
     {
         $response = $this->get('/');
 
@@ -22,13 +22,13 @@ class NavbarAestheticAndResponsiveTest extends TestCase
         $response->assertSee('AI Learning Center', false);
         $response->assertSee('Ekosistem Alumni Assalaam', false);
 
-        // One-line menu items
-        $response->assertSee('>Beranda<', false);
-        $response->assertSee('>Materi<', false);
-        $response->assertSee('>Prompts<', false);
-        $response->assertSee('>Showcase<', false);
-        $response->assertSee('>Agenda<', false);
+        // Grouped dropdown menu items
+        $response->assertSee('desktop-nav desktop-only', false);
+        $response->assertSee('nav-dropdown');
+        $response->assertSee('>Belajar<', false);
         $response->assertSee('>Komunitas<', false);
+        $response->assertSee('Materi Belajar');
+        $response->assertSee('Prompt Library');
     }
 
     public function test_desktop_navbar_has_portal_pill_and_auth_actions(): void
@@ -52,11 +52,34 @@ class NavbarAestheticAndResponsiveTest extends TestCase
 
         $response->assertStatus(200);
         
-        // Mobile elements inside drawer
-        $response->assertSee('mobile-drawer-footer');
-        $response->assertSee('mobile-portal-card');
-        $response->assertSee('Portal Pusat IKMAS (m.ikmas.com)');
-        $response->assertSee('mobile-auth-cluster');
+        // Mobile elements inside offcanvas drawer
+        $response->assertSee('ikmas-offcanvas');
+        $response->assertSee('offcanvas-footer');
+        $response->assertSee('offcanvas-portal-btn');
+        $response->assertSee('Portal Pusat m.ikmas.com');
+        $response->assertSee('offcanvas-auth');
+    }
+
+    public function test_landing_logo_uses_responsive_css_classes_instead_of_inline_dimensions(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+        $response->assertSee('hero-logo-emblem');
+        $response->assertSee('hero-logo-frame');
+        $response->assertSee('hero-logo-img');
+        $response->assertDontSee('max-height: 145px; width: auto; object-fit: contain;', false);
+    }
+
+    public function test_css_contains_tablet_breakpoint_and_hidden_offcanvas_defaults(): void
+    {
+        $css = file_get_contents(public_path('css/app.css'));
+
+        $this->assertStringContainsString('@media (max-width: 1024px)', $css);
+        $this->assertStringContainsString('.ikmas-offcanvas {', $css);
+        $this->assertStringContainsString('transform: translateX(100%);', $css);
+        $this->assertStringContainsString('.hero-logo-img', $css);
+        $this->assertStringContainsString('max-height: 96px;', $css);
     }
 
     public function test_authenticated_user_sees_dashboard_in_navbar_and_mobile_drawer(): void
