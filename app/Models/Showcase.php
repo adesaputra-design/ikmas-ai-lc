@@ -20,7 +20,12 @@ class Showcase extends Model
         'project_url',
         'impact_story',
         'status',
+        'is_featured',
         'admin_notes',
+    ];
+
+    protected $casts = [
+        'is_featured' => 'boolean',
     ];
 
     public function user(): BelongsTo

@@ -65,7 +65,7 @@ class AdminCurationTest extends TestCase
 
         $response = $this->actingAs($admin)->post("/admin/curation/{$showcase->id}/approve");
 
-        $response->assertRedirect('/admin/dashboard');
+        $response->assertRedirect('/admin/curation');
 
         $this->assertDatabaseHas('showcases', [
             'id' => $showcase->id,
@@ -91,7 +91,7 @@ class AdminCurationTest extends TestCase
             'admin_notes' => 'Tolong tambahkan screenshot bukti hasil penerapan karya.',
         ]);
 
-        $response->assertRedirect('/admin/dashboard');
+        $response->assertRedirect('/admin/curation');
 
         $this->assertDatabaseHas('showcases', [
             'id' => $showcase->id,

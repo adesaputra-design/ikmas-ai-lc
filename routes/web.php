@@ -46,6 +46,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('prompts', \App\Http\Controllers\Admin\AdminPromptController::class);
     Route::resource('agenda', \App\Http\Controllers\Admin\AdminEventController::class);
     Route::get('agenda/{agenda}/broadcast-text', [\App\Http\Controllers\Admin\AdminEventController::class, 'getBroadcastText'])->name('agenda.broadcast');
-    Route::post('/curation/{showcase}/approve', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'approveShowcase'])->name('curation.approve');
-    Route::post('/curation/{showcase}/reject', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'rejectShowcase'])->name('curation.reject');
+    Route::get('/curation', [\App\Http\Controllers\Admin\AdminShowcaseCurationController::class, 'index'])->name('curation.index');
+    Route::post('/curation/{showcase}/approve', [\App\Http\Controllers\Admin\AdminShowcaseCurationController::class, 'approve'])->name('curation.approve');
+    Route::post('/curation/{showcase}/reject', [\App\Http\Controllers\Admin\AdminShowcaseCurationController::class, 'reject'])->name('curation.reject');
+    Route::post('/curation/{showcase}/toggle-featured', [\App\Http\Controllers\Admin\AdminShowcaseCurationController::class, 'toggleFeatured'])->name('curation.toggle-featured');
+    Route::delete('/curation/{showcase}', [\App\Http\Controllers\Admin\AdminShowcaseCurationController::class, 'destroy'])->name('curation.destroy');
 });
