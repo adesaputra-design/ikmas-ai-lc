@@ -8,15 +8,10 @@
     <div class="hero-glow"></div>
     <div class="container">
         <div class="hero-content">
-            <div class="hero-badge" style="display: flex; justify-content: center; margin-bottom: 1.75rem;">
-                <a href="https://m.ikmas.com/" target="_blank" rel="noopener" class="badge" style="background: var(--bg-surface); border: 1px solid var(--primary-border); padding: 0.5rem 1.15rem; border-radius: var(--radius-full); display: inline-flex; align-items: center; gap: 0.75rem; text-decoration: none; box-shadow: var(--shadow-sm); transition: var(--transition);" title="Kunjungi Portal Pusat Ikatan Alumni Ma'had Assalaam">
-                    <img src="{{ asset('images/ikmas-logo.png') }}" alt="Logo Resmi IKMAS" style="height: 1.5rem; width: auto; object-fit: contain;">
-                    <span style="color: var(--text-main); font-weight: 700; font-size: 0.85rem; text-transform: none; letter-spacing: 0;">Inisiatif Resmi Ikatan Alumni Ma'had Assalaam</span>
-                    <span style="color: var(--primary); font-size: 0.8rem; font-weight: 800; display: inline-flex; align-items: center; gap: 0.2rem;">
-                        m.ikmas.com
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                    </span>
-                </a>
+            <div class="hero-logo-emblem" style="display: flex; justify-content: center; margin-bottom: 2rem;">
+                <div style="background: #ffffff; padding: 0.85rem 1.75rem; border-radius: var(--radius-2xl); box-shadow: 0 12px 36px rgba(0, 104, 55, 0.12); border: 1px solid rgba(0, 104, 55, 0.15); display: inline-flex; align-items: center; justify-content: center; transition: var(--transition);">
+                    <img src="{{ asset('images/ikmas-ai-logo.jpg') }}" alt="Logo Resmi IKMAS AI Learning Center" style="max-height: 145px; width: auto; object-fit: contain;">
+                </div>
             </div>
             
             <h1 class="hero-title">
