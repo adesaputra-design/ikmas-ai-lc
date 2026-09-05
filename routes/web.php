@@ -26,6 +26,10 @@ Route::get('/showcase/{slug}', [ShowcaseController::class, 'show'])->name('showc
 
 Route::get('/tentang', [\App\Http\Controllers\TentangController::class, 'index'])->name('tentang');
 
+// Modul Pustaka AI (Library)
+Route::get('/library', [\App\Http\Controllers\LibraryController::class, 'index'])->name('library.index');
+Route::get('/library/{slug}', [\App\Http\Controllers\LibraryController::class, 'show'])->name('library.show');
+
 
 // Auth Routes
 Route::redirect('/register', '/register/alumni', 301);
@@ -46,6 +50,8 @@ Route::middleware('auth')->prefix('member')->name('member.')->group(function () 
     Route::get('/dashboard', [MemberDashboardController::class, 'index'])->name('dashboard');
     Route::get('/showcase/create', [MemberDashboardController::class, 'createShowcase'])->name('showcase.create');
     Route::post('/showcase', [MemberDashboardController::class, 'storeShowcase'])->name('showcase.store');
+    Route::get('/library/create', [\App\Http\Controllers\Member\MemberLibrarySubmissionController::class, 'create'])->name('library.create');
+    Route::post('/library', [\App\Http\Controllers\Member\MemberLibrarySubmissionController::class, 'store'])->name('library.store');
     Route::post('/bookmarks/toggle', [MemberDashboardController::class, 'toggleBookmark'])->name('bookmarks.toggle');
     Route::post('/password', [MemberDashboardController::class, 'updatePassword'])->name('password.update');
 });
@@ -111,6 +117,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::post('/subscribers/{user}/approve', [\App\Http\Controllers\Admin\AdminSubscriberController::class, 'approve'])->name('subscribers.approve');
         Route::post('/subscribers/{user}/reject', [\App\Http\Controllers\Admin\AdminSubscriberController::class, 'reject'])->name('subscribers.reject');
         Route::delete('/subscribers/{user}', [\App\Http\Controllers\Admin\AdminSubscriberController::class, 'destroy'])->name('subscribers.destroy');
+    });
+
+    // Modul Pustaka AI & Kurasi Karya Ilmiah
+    Route::middleware('permission:library')->group(function () {
+        Route::resource('library', \App\Http\Controllers\Admin\AdminLibraryController::class)->parameters(['library' => 'item']);
+        Route::post('/library/{item}/approve', [\App\Http\Controllers\Admin\AdminLibraryController::class, 'approve'])->name('library.approve');
+        Route::post('/library/{item}/reject', [\App\Http\Controllers\Admin\AdminLibraryController::class, 'reject'])->name('library.reject');
     });
 });
 

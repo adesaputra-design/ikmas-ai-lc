@@ -36,13 +36,12 @@
             </div>
 
             @if(!$user->isSubscriber())
-            <div style="display: flex; gap: 0.75rem;">
-                <a href="{{ url('/member/showcase/create') }}" class="btn btn-primary">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    <span>Ajukan Karya Baru</span>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <a href="{{ route('member.library.create') }}" class="btn btn-primary" style="background: linear-gradient(135deg, #f59e0b, #d97706); border-color: #d97706;">
+                    <span>🎓 Ajukan Karya Ilmiah</span>
+                </a>
+                <a href="{{ url('/member/showcase/create') }}" class="btn btn-secondary">
+                    <span>+ Showcase Baru</span>
                 </a>
             </div>
             @endif
@@ -120,8 +119,133 @@
     </div>
     @endif
 
-    <!-- Bookmarked Prompts Section -->
-    <div>
+    @if(!$user->isSubscriber())
+    <!-- My Academic Papers Section -->
+    <div style="margin-bottom: 4rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+                <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-main);">Karya Ilmiah Saya di Pustaka AI</h2>
+                <p style="font-size: 0.875rem; color: var(--text-muted);">Pantau status kurasi skripsi, tesis, disertasi, atau paper riset yang kamu ajukan.</p>
+            </div>
+            <a href="{{ route('member.library.create') }}" class="btn btn-secondary btn-sm">
+                + Ajukan Karya Ilmiah
+            </a>
+        </div>
+
+        @if($myAcademicPapers->count() > 0)
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+                @foreach($myAcademicPapers as $paper)
+                    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                @if($paper->status === 'approved')
+                                    <span class="badge badge-emerald">✨ Terbit di Pustaka</span>
+                                @elseif($paper->status === 'rejected')
+                                    <span class="badge" style="background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2);">⚠️ Perlu Revisi</span>
+                                @else
+                                    <span class="badge badge-amber">⏳ Menunggu Kurasi</span>
+                                @endif
+                                <span class="badge badge-secondary" style="font-size: 0.75rem;">
+                                    {{ $paper->degree_label }}
+                                </span>
+                            </div>
+
+                            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">
+                                {{ $paper->title }}
+                            </h3>
+
+                            <div style="font-size: 0.825rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                                🏛️ {{ $paper->institution }} &bull; 🗓️ {{ $paper->publication_year }}
+                            </div>
+
+                            <p style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1rem;">
+                                {{ Str::limit($paper->summary_preview, 110) }}
+                            </p>
+
+                            @if($paper->status === 'rejected' && $paper->rejection_note)
+                                <div style="background: rgba(239,68,68,0.08); border-radius: var(--radius-md); padding: 0.625rem 0.875rem; font-size: 0.8rem; color: #ef4444; margin-bottom: 0.75rem;">
+                                    <strong>Catatan Pengurus:</strong> {{ $paper->rejection_note }}
+                                </div>
+                            @endif
+                        </div>
+
+                        @if($paper->status === 'approved')
+                            <div style="border-top: 1px solid var(--border-color); padding-top: 0.75rem; margin-top: 1rem; text-align: right;">
+                                <a href="{{ route('library.show', $paper->slug) }}" class="btn btn-secondary btn-sm">
+                                    Lihat di Pustaka Publik →
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🎓</div>
+                <h4 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--text-main);">Belum Ada Karya Ilmiah yang Diajukan</h4>
+                <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 440px; margin: 0 auto 1.25rem auto;">
+                    Punya skripsi, tesis, disertasi, atau publikasi jurnal terkait AI & teknologi? Arsipkan karya intelektualmu bersama alumni Assalaam!
+                </p>
+                <a href="{{ route('member.library.create') }}" class="btn btn-primary btn-sm">
+                    Mulai Ajukan Karya Ilmiah
+                </a>
+            </div>
+        @endif
+    </div>
+    @endif
+
+    <!-- Bookmarked Prompts & Library Section -->
+    <div style="margin-bottom: 4rem;">
+        <div style="margin-bottom: 1.5rem;">
+            <h2 style="font-size: 1.5rem; font-weight: 800;">Pustaka AI Tersimpan (Bookmarks)</h2>
+            <p style="font-size: 0.875rem; color: var(--text-muted);">Buku, resume podcast, dan karya ilmiah yang kamu simpan untuk dibaca nanti.</p>
+        </div>
+
+        @if($bookmarkedLibraries->count() > 0)
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+                @foreach($bookmarkedLibraries as $bLib)
+                    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <span class="badge {{ $bLib->type_badge['class'] }}" style="font-size: 0.7rem;">
+                                    {{ $bLib->type_badge['icon'] }} {{ $bLib->type_badge['label'] }}
+                                </span>
+                                <span style="font-size: 0.75rem; color: var(--text-muted);">
+                                    {{ $bLib->category }}
+                                </span>
+                            </div>
+                            <h4 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">
+                                <a href="{{ route('library.show', $bLib->slug) }}" style="color: inherit; text-decoration: none;">
+                                    {{ $bLib->title }}
+                                </a>
+                            </h4>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+                                {{ Str::limit($bLib->summary_preview, 100) }}
+                            </p>
+                        </div>
+                        <div style="border-top: 1px solid var(--border-color); padding-top: 0.75rem; margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                            <a href="{{ route('library.show', $bLib->slug) }}" class="btn btn-secondary btn-sm" style="font-size: 0.8rem;">
+                                Buka Materi →
+                            </a>
+                            <form method="POST" action="{{ route('member.bookmarks.toggle') }}">
+                                @csrf
+                                <input type="hidden" name="type" value="library">
+                                <input type="hidden" name="id" value="{{ $bLib->id }}">
+                                <button type="submit" class="btn btn-sm" style="color: #ef4444; background: none; border: none; font-size: 0.8rem; cursor: pointer;">
+                                    ✕ Hapus
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <div class="card" style="text-align: center; padding: 2rem 1.5rem; margin-bottom: 2.5rem;">
+                <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 0.75rem;">Kamu belum menyimpan buku, podcast, atau paper favorit.</p>
+                <a href="{{ route('library.index') }}" class="btn btn-secondary btn-sm">Jelajahi Pustaka AI</a>
+            </div>
+        @endif
+
         <div style="margin-bottom: 1.5rem;">
             <h2 style="font-size: 1.5rem; font-weight: 800;">Prompt Tersimpan (Bookmarks)</h2>
             <p style="font-size: 0.875rem; color: var(--text-muted);">Daftar instruksi prompt yang kamu simpan untuk akses kilat.</p>

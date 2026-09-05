@@ -20,13 +20,24 @@ class MemberDashboardController extends Controller
             ->latest()
             ->get();
 
+        $myAcademicPapers = \App\Models\LibraryItem::where('user_id', $user->id)
+            ->where('type', 'academic')
+            ->latest()
+            ->get();
+
         $bookmarkedPromptIds = Bookmark::where('user_id', $user->id)
             ->where('bookmarkable_type', 'prompt')
             ->pluck('bookmarkable_id');
 
         $bookmarkedPrompts = Prompt::whereIn('id', $bookmarkedPromptIds)->get();
 
-        return view('member.dashboard', compact('user', 'myShowcases', 'bookmarkedPrompts'));
+        $bookmarkedLibraryIds = Bookmark::where('user_id', $user->id)
+            ->where('bookmarkable_type', 'library')
+            ->pluck('bookmarkable_id');
+
+        $bookmarkedLibraries = \App\Models\LibraryItem::whereIn('id', $bookmarkedLibraryIds)->get();
+
+        return view('member.dashboard', compact('user', 'myShowcases', 'myAcademicPapers', 'bookmarkedPrompts', 'bookmarkedLibraries'));
     }
 
     public function createShowcase()
@@ -85,7 +96,7 @@ class MemberDashboardController extends Controller
     {
         $validated = $request->validate([
             'id' => ['required', 'integer'],
-            'type' => ['required', 'string', 'in:prompt,material'],
+            'type' => ['required', 'string', 'in:prompt,material,library'],
         ]);
 
         $user = Auth::user();
@@ -96,7 +107,10 @@ class MemberDashboardController extends Controller
 
         if ($existing) {
             $existing->delete();
-            return response()->json(['bookmarked' => false]);
+            if ($request->wantsJson()) {
+                return response()->json(['bookmarked' => false]);
+            }
+            return back()->with('info', 'Dihapus dari daftar simpan.');
         }
 
         Bookmark::create([
@@ -105,7 +119,10 @@ class MemberDashboardController extends Controller
             'bookmarkable_type' => $validated['type'],
         ]);
 
-        return response()->json(['bookmarked' => true]);
+        if ($request->wantsJson()) {
+            return response()->json(['bookmarked' => true]);
+        }
+        return back()->with('success', 'Berhasil disimpan ke bookmark.');
     }
 
     public function updatePassword(Request $request)

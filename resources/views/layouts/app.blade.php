@@ -33,7 +33,7 @@
                 <ul class="nav-links">
                     <!-- Dropdown Belajar -->
                     <li class="nav-dropdown" data-dropdown="belajar">
-                        <button type="button" class="nav-link nav-dropdown-btn {{ request()->is('materi*') || request()->is('prompts*') ? 'active' : '' }}" aria-expanded="false">
+                        <button type="button" class="nav-link nav-dropdown-btn {{ request()->is('materi*') || request()->is('prompts*') || request()->is('library*') ? 'active' : '' }}" aria-expanded="false">
                             <span>Belajar</span>
                             <svg class="dropdown-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
                         </button>
@@ -54,6 +54,15 @@
                                 <div class="dropdown-item-text">
                                     <span class="dropdown-item-title">Prompt Library</span>
                                     <span class="dropdown-item-desc">Koleksi prompt AI teruji alumni</span>
+                                </div>
+                            </a>
+                            <a href="{{ url('/library') }}" class="dropdown-item {{ request()->is('library*') ? 'active' : '' }}">
+                                <div class="dropdown-item-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                                </div>
+                                <div class="dropdown-item-text">
+                                    <span class="dropdown-item-title">Pustaka AI</span>
+                                    <span class="dropdown-item-desc">Buku, podcast & riset alumni</span>
                                 </div>
                             </a>
                         </div>
@@ -204,6 +213,14 @@
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
                         </span>
                         <span>Prompt Library</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url('/library') }}" class="offcanvas-nav-item {{ request()->is('library*') ? 'active' : '' }}">
+                        <span class="offcanvas-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                        </span>
+                        <span>Pustaka AI</span>
                     </a>
                 </li>
 

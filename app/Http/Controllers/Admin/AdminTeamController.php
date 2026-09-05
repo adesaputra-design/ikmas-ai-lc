@@ -33,6 +33,10 @@ class AdminTeamController extends Controller
             'label' => 'Konten Halaman Tentang',
             'desc' => 'Mengedit informasi profil, visi-misi, dan FAQ landing page.',
         ],
+        'library' => [
+            'label' => 'Pustaka & Karya Ilmiah',
+            'desc' => 'Mengelola buku, podcast, dan kurasi karya ilmiah alumni.',
+        ],
     ];
 
     public function index(Request $request)

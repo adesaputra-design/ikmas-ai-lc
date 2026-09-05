@@ -460,5 +460,7 @@ Tolong bantu saya:
                 $sc
             );
         }
+
+        $this->call(LibraryItemSeeder::class);
     }
 }
