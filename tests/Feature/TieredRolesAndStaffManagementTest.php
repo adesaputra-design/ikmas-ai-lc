@@ -59,6 +59,15 @@ class TieredRolesAndStaffManagementTest extends TestCase
         $this->assertFalse($user->hasPermission('materials'));
     }
 
+    public function test_get_role_url_redirects_to_team_index(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $user = User::factory()->create(['role' => 'member']);
+
+        $response = $this->actingAs($admin)->get("/admin/team/{$user->id}/role");
+        $response->assertRedirect(route('admin.team.index'));
+    }
+
     public function test_staff_can_only_access_assigned_modules(): void
     {
         $staff = User::factory()->create([

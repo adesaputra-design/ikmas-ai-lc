@@ -94,7 +94,20 @@ class AdminTeamController extends Controller
             $user->permissions = null;
         }
 
-        $user->save();
+        if ($user->status !== 'active') {
+            $user->status = 'active';
+        }
+
+        try {
+            $user->save();
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to update user role: ' . $e->getMessage(), [
+                'user_id' => $user->id,
+                'role' => $user->role,
+                'exception' => $e,
+            ]);
+            return back()->with('error', 'Terjadi kesalahan sistem saat menyimpan peran: ' . $e->getMessage());
+        }
 
         $roleName = match ($user->role) {
             'admin' => 'Administrator',

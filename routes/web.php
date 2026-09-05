@@ -95,6 +95,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Modul Kelola Tim & Staf + Hapus Anggota (Eksklusif Admin Utama)
     Route::middleware('permission:manage_team')->group(function () {
         Route::get('/team', [\App\Http\Controllers\Admin\AdminTeamController::class, 'index'])->name('team.index');
+        Route::get('/team/{user}/role', fn() => redirect()->route('admin.team.index'));
         Route::post('/team/{user}/role', [\App\Http\Controllers\Admin\AdminTeamController::class, 'updateRole'])->name('team.update-role');
         Route::delete('/team/{user}', [\App\Http\Controllers\Admin\AdminTeamController::class, 'destroy'])->name('team.destroy');
         Route::post('/team/{id}/restore', [\App\Http\Controllers\Admin\AdminTeamController::class, 'restore'])->name('team.restore');
