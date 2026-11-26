@@ -123,7 +123,11 @@
                                     <span class="badge badge-amber">{{ $item->degree_label }}</span>
                                 @endif
                                 <span class="badge {{ $item->status === 'approved' ? 'badge-emerald' : ($item->status === 'pending' ? 'badge-amber' : 'badge-secondary') }}" style="{{ $item->status === 'rejected' ? 'background: rgba(239,68,68,0.1); color: #ef4444;' : '' }}">
-                                    {{ $item->status === 'approved' ? '✓ Terbit' : ($item->status === 'pending' ? '⏳ Menunggu Review' : '✕ Ditolak') }}
+                                    @if($item->isEbook())
+                                        {{ $item->isApproved() && $item->is_public ? '✓ Terbit' : '✎ Draf Privat' }}
+                                    @else
+                                        {{ $item->status === 'approved' ? '✓ Terbit' : ($item->status === 'pending' ? '⏳ Menunggu Review' : '✕ Ditolak') }}
+                                    @endif
                                 </span>
                                 @if($item->is_featured)
                                     <span class="badge badge-amber">⭐ Unggulan</span>
@@ -146,6 +150,10 @@
                                     @if($item->user)
                                         <span style="margin-left: 0.5rem; color: var(--primary); font-weight: 600;">(Alumni: {{ $item->user->name }} - {{ $item->user->alumni_year ?? 'Member' }})</span>
                                     @endif
+                                @elseif($item->isEbook())
+                                    {{ $item->series_name ?? 'Ebook' }}@if($item->edition_number) · Edisi #{{ $item->edition_number }}@endif
+                                    @if($item->author_name) · <strong style="color: var(--text-main);">{{ $item->author_name }}</strong>@endif
+                                    @if($item->reading_time) · {{ $item->reading_time }}@endif
                                 @endif
                             </div>
 

@@ -43,6 +43,7 @@ Route::get('/tentang', [TentangController::class, 'index'])->name('tentang');
 // Modul Pustaka AI (Library)
 Route::get('/library', [LibraryController::class, 'index'])->name('library.index');
 Route::get('/library/{slug}', [LibraryController::class, 'show'])->name('library.show');
+Route::get('/library/{slug}/bab/{chapterSlug}', [LibraryController::class, 'chapter'])->name('library.ebook.chapter');
 
 // Auth Routes
 Route::redirect('/register', '/register/alumni', 301);
@@ -141,5 +142,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::post('/library/{item}/chapters', [AdminLibraryChapterController::class, 'store'])->name('library.chapters.store');
         Route::get('/library/{item}/preview', [AdminLibraryChapterController::class, 'preview'])->name('library.preview');
         Route::get('/library/{item}/preview/bab/{chapterSlug}', [AdminLibraryChapterController::class, 'previewChapter'])->name('library.preview.chapter');
+        Route::post('/library/{item}/publish', [AdminLibraryChapterController::class, 'publish'])->name('library.publish');
     });
 });

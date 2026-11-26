@@ -79,7 +79,6 @@ class AdminLibraryController extends Controller
             // Ebook fields
             'series_name' => 'nullable|string|max:255',
             'edition_number' => 'nullable|integer|min:1',
-            'is_public' => 'nullable|boolean',
 
             // Podcast fields
             'podcast_source' => 'nullable|string|max:255',
@@ -131,7 +130,7 @@ class AdminLibraryController extends Controller
             $item->author_name = $validated['author_name'] ?? null;
             $item->reading_time = $validated['reading_time'] ?? null;
         } elseif ($item->type === 'ebook') {
-            $this->fillEbookFields($item, $validated, $request);
+            $this->fillEbookFields($item, $validated);
         } elseif ($item->type === 'podcast') {
             $item->podcast_source = $validated['podcast_source'] ?? null;
             $item->media_embed_url = $validated['media_embed_url'] ?? null;
@@ -174,7 +173,7 @@ class AdminLibraryController extends Controller
             'content' => 'nullable|string',
             'cover_image' => 'nullable|image|max:3072',
             'is_featured' => 'nullable|boolean',
-            'status' => 'required|in:pending,approved,rejected',
+            'status' => $item->isEbook() ? 'nullable' : 'required|in:pending,approved,rejected',
 
             // Book fields
             'author_name' => 'nullable|string|max:255',
@@ -183,7 +182,6 @@ class AdminLibraryController extends Controller
             // Ebook fields
             'series_name' => 'nullable|string|max:255',
             'edition_number' => 'nullable|integer|min:1',
-            'is_public' => 'nullable|boolean',
 
             // Podcast fields
             'podcast_source' => 'nullable|string|max:255',
@@ -205,8 +203,10 @@ class AdminLibraryController extends Controller
         $item->summary_preview = $validated['summary_preview'];
         $item->content = $validated['content'] ?? null;
         $item->is_featured = $request->boolean('is_featured');
-        $item->status = $validated['status'];
-        $item->rejection_note = $validated['rejection_note'] ?? null;
+        if (! $item->isEbook()) {
+            $item->status = $validated['status'];
+            $item->rejection_note = $validated['rejection_note'] ?? null;
+        }
 
         if ($request->hasFile('cover_image')) {
             if ($item->cover_image && Storage::disk('public')->exists($item->cover_image)) {
@@ -226,7 +226,7 @@ class AdminLibraryController extends Controller
             $item->author_name = $validated['author_name'] ?? null;
             $item->reading_time = $validated['reading_time'] ?? null;
         } elseif ($item->type === 'ebook') {
-            $this->fillEbookFields($item, $validated, $request);
+            $this->fillEbookFields($item, $validated);
         } elseif ($item->type === 'podcast') {
             $item->podcast_source = $validated['podcast_source'] ?? null;
             $item->media_embed_url = $validated['media_embed_url'] ?? null;
@@ -245,16 +245,21 @@ class AdminLibraryController extends Controller
             ->with('success', "Item '{$item->title}' berhasil diperbarui!");
     }
 
-    private function fillEbookFields(LibraryItem $item, array $validated, Request $request): void
+    /**
+     * @param  array<string, mixed>  $validated
+     */
+    private function fillEbookFields(LibraryItem $item, array $validated): void
     {
         $item->author_name = $validated['author_name'] ?? null;
         $item->series_name = $validated['series_name'] ?? null;
         $item->edition_number = $validated['edition_number'] ?? null;
-        $item->is_public = $request->boolean('is_public');
     }
 
     public function approve(LibraryItem $item)
     {
+        // Ebook hanya terbit lewat publish(), yang mewajibkan persetujuan editorial.
+        abort_if($item->isEbook(), 404);
+
         $item->update([
             'status' => 'approved',
             'rejection_note' => null,

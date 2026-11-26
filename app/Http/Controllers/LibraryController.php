@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LibraryItem;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -10,7 +11,7 @@ class LibraryController extends Controller
 {
     public function index(Request $request)
     {
-        $query = LibraryItem::approved()->with('user')->latest();
+        $query = LibraryItem::visibleToPublic()->with('user')->latest();
 
         if ($request->filled('type')) {
             $query->byType($request->type);
@@ -35,13 +36,14 @@ class LibraryController extends Controller
         $items = $query->paginate(12)->withQueryString();
 
         $stats = [
-            'total' => LibraryItem::approved()->count(),
+            'total' => LibraryItem::visibleToPublic()->count(),
             'books' => LibraryItem::approved()->where('type', 'book')->count(),
             'podcasts' => LibraryItem::approved()->where('type', 'podcast')->count(),
             'academics' => LibraryItem::approved()->where('type', 'academic')->count(),
+            'ebooks' => LibraryItem::visibleToPublic()->where('type', 'ebook')->count(),
         ];
 
-        $categories = LibraryItem::approved()
+        $categories = LibraryItem::visibleToPublic()
             ->select('category')
             ->distinct()
             ->pluck('category')
@@ -53,10 +55,19 @@ class LibraryController extends Controller
 
     public function show(string $slug)
     {
-        $item = LibraryItem::approved()->where('slug', $slug)->firstOrFail();
+        $item = LibraryItem::visibleToPublic()->where('slug', $slug)->firstOrFail();
 
         // Increment view count
         $item->increment('views_count');
+
+        if ($item->isEbook()) {
+            return view('library.ebook.cover', [
+                'item' => $item,
+                'chapters' => $item->chapters()->get(),
+                'isPreview' => false,
+                'isBookmarked' => Auth::check() && $item->bookmarks()->where('user_id', Auth::id())->exists(),
+            ]);
+        }
 
         $user = Auth::user();
         $isUnlocked = false;
@@ -72,7 +83,7 @@ class LibraryController extends Controller
             $isBookmarked = $item->bookmarks()->where('user_id', $user->id)->exists();
         }
 
-        $relatedItems = LibraryItem::approved()
+        $relatedItems = LibraryItem::visibleToPublic()
             ->where('id', '!=', $item->id)
             ->where(function ($q) use ($item) {
                 $q->where('type', $item->type)
@@ -83,5 +94,22 @@ class LibraryController extends Controller
             ->get();
 
         return view('library.show', compact('item', 'isUnlocked', 'isBookmarked', 'relatedItems'));
+    }
+
+    public function chapter(string $slug, string $chapterSlug): View
+    {
+        $item = LibraryItem::visibleToPublic()->where('type', 'ebook')->where('slug', $slug)->firstOrFail();
+
+        $chapters = $item->chapters()->get();
+        $index = $chapters->search(fn ($chapter) => $chapter->slug === $chapterSlug);
+        abort_if($index === false, 404);
+
+        return view('library.ebook.chapter', [
+            'item' => $item,
+            'chapter' => $chapters[$index],
+            'previous' => $chapters->get($index - 1),
+            'next' => $chapters->get($index + 1),
+            'isPreview' => false,
+        ]);
     }
 }

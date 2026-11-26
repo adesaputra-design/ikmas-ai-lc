@@ -120,12 +120,8 @@
                                style="width: 100%; padding: 0.55rem 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); color: var(--text-main);">
                     </div>
                 </div>
-                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; margin-top: 1rem; cursor: pointer;">
-                    <input type="checkbox" name="is_public" value="1" {{ old('is_public', $item->is_public) ? 'checked' : '' }}>
-                    <span><strong>Isi bab terbuka untuk publik</strong> (berlaku setelah ebook diterbitkan)</span>
-                </label>
                 <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.75rem 0 0;">
-                    Waktu baca dihitung otomatis dari bab. Bab dikelola dari halaman "Kelola Bab" setelah draf disimpan.
+                    Waktu baca dihitung otomatis dari bab. Bab dikelola dan ebook diterbitkan dari halaman "Kelola Bab" setelah draf disimpan.
                 </p>
             </div>
 
@@ -245,7 +241,12 @@
                         <span style="font-weight: 700;">⭐ Jadikan Koleksi Unggulan</span>
                     </label>
 
-                    @if($isEdit)
+                    @if($isEdit && $item->isEbook())
+                        <div style="border-top: 1px solid var(--border-color); padding-top: 0.75rem; font-size: 0.8rem; color: var(--text-muted);">
+                            Status: <strong>{{ $item->is_public && $item->isApproved() ? 'Terbit' : 'Draf privat' }}</strong>. Ebook diterbitkan dari halaman
+                            <a href="{{ route('admin.library.chapters.index', $item) }}">Kelola Bab</a>.
+                        </div>
+                    @elseif($isEdit)
                         <div style="border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
                             <label for="status" style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.25rem;">Status Publikasi</label>
                             <select id="status" name="status" style="width: 100%; padding: 0.4rem 0.6rem; font-size: 0.85rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); color: var(--text-main);">

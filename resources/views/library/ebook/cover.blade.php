@@ -7,14 +7,14 @@
 @php
     $chapterUrl = fn ($chapter) => $isPreview
         ? route('admin.library.preview.chapter', [$item, $chapter->slug])
-        : url("/library/{$item->slug}/bab/{$chapter->slug}");
+        : route('library.ebook.chapter', [$item->slug, $chapter->slug]);
 @endphp
 
 @section('content')
 <div class="ebook-shell">
     @if($isPreview)
         <div class="ebook-preview-bar" role="status">
-            <span><strong>Mode pratinjau.</strong> Status: {{ $item->status }} · {{ $item->is_public ? 'akses publik' : 'akses terbatas' }}. Halaman ini tidak terlihat oleh tamu.</span>
+            <span><strong>Mode pratinjau.</strong> Status: {{ $item->isApproved() && $item->is_public ? 'terbit untuk publik' : 'draf privat, belum terlihat oleh pembaca' }}.</span>
             <a href="{{ route('admin.library.chapters.index', $item) }}">← Kelola bab</a>
         </div>
     @endif
@@ -49,8 +49,25 @@
                     </li>
                 @endforeach
             </ol>
-            <a href="{{ $chapterUrl($chapters->first()) }}" class="btn btn-primary">Mulai Membaca →</a>
         @endif
+
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+            @if($chapters->isNotEmpty())
+                <a href="{{ $chapterUrl($chapters->first()) }}" class="btn btn-primary">Mulai Membaca →</a>
+            @endif
+            @unless($isPreview)
+                @auth
+                    <form method="POST" action="{{ route('member.bookmarks.toggle') }}">
+                        @csrf
+                        <input type="hidden" name="type" value="library">
+                        <input type="hidden" name="id" value="{{ $item->id }}">
+                        <button type="submit" class="btn btn-secondary">{{ $isBookmarked ? '★ Hapus dari Bookmark' : '☆ Simpan ke Bookmark' }}</button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}" class="btn btn-secondary">Masuk untuk menyimpan</a>
+                @endauth
+            @endunless
+        </div>
     </div>
 </div>
 @endsection

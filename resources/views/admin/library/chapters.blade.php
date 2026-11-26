@@ -8,6 +8,7 @@
     $labelStyle = 'display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.35rem;';
     $oldSummary = old('summary_points', ['']);
     $oldChecklist = old('action_checklist', ['']);
+    $isPublished = $item->isApproved() && $item->is_public;
 @endphp
 
 @section('content')
@@ -23,7 +24,7 @@
     <div class="card" style="padding: 1.5rem; margin-bottom: 1.5rem;">
         <div style="font-size: 0.8rem; color: var(--text-muted);">
             {{ $item->series_name ?? 'Ebook' }}@if($item->edition_number) · Edisi #{{ $item->edition_number }}@endif
-            · Status: <strong>{{ $item->status }}</strong> · {{ $item->is_public ? 'Akses publik' : 'Akses terbatas' }}
+            · Status: <strong>{{ $isPublished ? 'Terbit untuk publik' : 'Draf privat' }}</strong>
         </div>
         <h2 style="font-size: 1.3rem; font-weight: 800; margin: 0.25rem 0 1rem;">{{ $item->title }}</h2>
 
@@ -59,10 +60,41 @@
         @endif
     </div>
 
+    @if($isPublished)
+        <div class="card" style="padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid var(--accent-emerald);">
+            <strong>✓ Ebook sudah terbit.</strong>
+            <span style="color: var(--text-muted); font-size: 0.9rem;">Bab yang ditambahkan sekarang langsung terlihat oleh pembaca.</span>
+            <a href="{{ route('library.show', $item->slug) }}" target="_blank" style="margin-left: 0.5rem;">Lihat halaman publik ↗</a>
+        </div>
+    @else
+        <div class="card" style="padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid var(--accent-amber);">
+            <h3 style="font-size: 1.05rem; font-weight: 800; margin: 0 0 0.5rem;">Terbitkan Ebook</h3>
+            @error('chapters')
+                <div style="color: #ef4444; font-size: 0.85rem; margin-bottom: 0.5rem;">{{ $message }}</div>
+            @enderror
+            @error('editorial_approved')
+                <div style="color: #ef4444; font-size: 0.85rem; margin-bottom: 0.5rem;">{{ $message }}</div>
+            @enderror
+            <form method="POST" action="{{ route('admin.library.publish', $item) }}" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                @csrf
+                <label style="display: flex; gap: 0.5rem; align-items: flex-start; font-size: 0.875rem; cursor: pointer;">
+                    <input type="checkbox" name="editorial_approved" value="1" style="margin-top: 0.2rem;">
+                    <span>Naskah sudah final dan setiap kutipan narasumber sudah disetujui atau berasal dari rekaman.</span>
+                </label>
+                <div>
+                    <button type="submit" class="btn btn-primary btn-sm" @disabled($chapters->isEmpty())>Terbitkan untuk Publik</button>
+                    @if($chapters->isEmpty())
+                        <span style="font-size: 0.8rem; color: var(--text-muted); margin-left: 0.5rem;">Tambahkan minimal satu bab dulu.</span>
+                    @endif
+                </div>
+            </form>
+        </div>
+    @endif
+
     <div class="card" style="padding: 1.5rem;">
         <h3 style="font-size: 1.1rem; font-weight: 800; margin: 0 0 1rem;">Tambah Bab</h3>
 
-        @if ($errors->any())
+        @if ($errors->any() && ! $errors->hasAny(['chapters', 'editorial_approved']))
             <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1rem; color: #ef4444; font-size: 0.875rem;">
                 @foreach ($errors->all() as $error)
                     <div>• {{ $error }}</div>

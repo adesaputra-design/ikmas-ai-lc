@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\LibraryItem;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class AdminLibraryChapterController extends Controller
@@ -69,6 +70,30 @@ class AdminLibraryChapterController extends Controller
             'next' => $chapters->get($index + 1),
             'isPreview' => true,
         ]);
+    }
+
+    public function publish(Request $request, LibraryItem $item): RedirectResponse
+    {
+        abort_unless($item->isEbook(), 404);
+
+        $request->validate([
+            'editorial_approved' => ['accepted'],
+        ], [
+            'editorial_approved.accepted' => 'Centang konfirmasi bahwa naskah dan kutipan sudah disetujui narasumber.',
+        ]);
+
+        if (! $item->chapters()->exists()) {
+            return back()->withErrors(['chapters' => 'Tambahkan setidaknya satu bab sebelum menerbitkan ebook.']);
+        }
+
+        $item->update([
+            'status' => 'approved',
+            'is_public' => true,
+            'rejection_note' => null,
+        ]);
+
+        return redirect()->route('admin.library.chapters.index', $item)
+            ->with('success', "Ebook '{$item->title}' sudah terbit dan dapat dibaca publik.");
     }
 
     private function cleanLines(array $lines): array

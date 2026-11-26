@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -81,9 +82,19 @@ class LibraryItem extends Model
         return $query->where('status', 'approved');
     }
 
+    /**
+     * Approved items, excluding ebooks that have not been published to the public.
+     */
+    public function scopeVisibleToPublic(Builder $query): Builder
+    {
+        return $query->approved()->where(function (Builder $query): void {
+            $query->where('type', '!=', 'ebook')->orWhere('is_public', true);
+        });
+    }
+
     public function scopeByType($query, ?string $type)
     {
-        if ($type && in_array($type, ['book', 'podcast', 'academic'])) {
+        if ($type && in_array($type, ['book', 'podcast', 'academic', 'ebook'])) {
             return $query->where('type', $type);
         }
 

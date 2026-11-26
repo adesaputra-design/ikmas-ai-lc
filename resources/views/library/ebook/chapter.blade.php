@@ -5,17 +5,17 @@
 @include('library.ebook._styles')
 
 @php
-    $coverUrl = $isPreview ? route('admin.library.preview', $item) : url("/library/{$item->slug}");
+    $coverUrl = $isPreview ? route('admin.library.preview', $item) : route('library.show', $item->slug);
     $chapterUrl = fn ($target) => $isPreview
         ? route('admin.library.preview.chapter', [$item, $target->slug])
-        : url("/library/{$item->slug}/bab/{$target->slug}");
+        : route('library.ebook.chapter', [$item->slug, $target->slug]);
 @endphp
 
 @section('content')
 <div class="ebook-shell">
     @if($isPreview)
         <div class="ebook-preview-bar" role="status">
-            <span><strong>Mode pratinjau.</strong> Bab ini belum terlihat oleh tamu.</span>
+            <span><strong>Mode pratinjau.</strong> {{ $item->isApproved() && $item->is_public ? 'Ebook ini sudah terbit.' : 'Bab ini belum terlihat oleh pembaca.' }}</span>
             <a href="{{ route('admin.library.chapters.index', $item) }}">← Kelola bab</a>
         </div>
     @endif
