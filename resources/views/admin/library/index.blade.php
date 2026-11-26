@@ -77,6 +77,10 @@
                class="btn btn-sm {{ $tab === 'academic' ? 'btn-primary' : 'btn-secondary' }}">
                 🎓 Karya Ilmiah ({{ $academicCount }})
             </a>
+            <a href="{{ route('admin.library.index', ['tab' => 'ebook']) }}"
+               class="btn btn-sm {{ $tab === 'ebook' ? 'btn-primary' : 'btn-secondary' }}">
+                📖 Ebook ({{ $ebookCount }})
+            </a>
         </div>
 
         <!-- Search Bar -->
@@ -127,7 +131,7 @@
                             </div>
 
                             <h3 style="font-size: 1.2rem; font-weight: 800; margin: 0 0 0.25rem 0; line-height: 1.3;">
-                                <a href="{{ url('/library/' . $item->slug) }}" target="_blank" style="color: inherit; text-decoration: none;">
+                                <a href="{{ $item->isEbook() ? route('admin.library.preview', $item) : url('/library/' . $item->slug) }}" target="_blank" style="color: inherit; text-decoration: none;">
                                     {{ $item->title }}
                                 </a>
                             </h3>
@@ -159,9 +163,18 @@
 
                     <!-- Actions Buttons -->
                     <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-                        <a href="{{ url('/library/' . $item->slug) }}" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 0.8rem;">
-                            Lihat ↗
-                        </a>
+                        @if($item->isEbook())
+                            <a href="{{ route('admin.library.preview', $item) }}" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 0.8rem;">
+                                Pratinjau ↗
+                            </a>
+                            <a href="{{ route('admin.library.chapters.index', $item) }}" class="btn btn-secondary btn-sm" style="font-size: 0.8rem;">
+                                Kelola Bab
+                            </a>
+                        @else
+                            <a href="{{ url('/library/' . $item->slug) }}" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 0.8rem;">
+                                Lihat ↗
+                            </a>
+                        @endif
 
                         <a href="{{ route('admin.library.edit', $item->id) }}" class="btn btn-secondary btn-sm" style="font-size: 0.8rem;">
                             Edit

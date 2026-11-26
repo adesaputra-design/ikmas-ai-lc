@@ -24,11 +24,11 @@ class LibraryController extends Controller
             $search = trim($request->q);
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('summary_preview', 'like', "%{$search}%")
-                  ->orWhere('author_name', 'like', "%{$search}%")
-                  ->orWhere('podcast_source', 'like', "%{$search}%")
-                  ->orWhere('institution', 'like', "%{$search}%")
-                  ->orWhere('category', 'like', "%{$search}%");
+                    ->orWhere('summary_preview', 'like', "%{$search}%")
+                    ->orWhere('author_name', 'like', "%{$search}%")
+                    ->orWhere('podcast_source', 'like', "%{$search}%")
+                    ->orWhere('institution', 'like', "%{$search}%")
+                    ->orWhere('category', 'like', "%{$search}%");
             });
         }
 
@@ -69,14 +69,14 @@ class LibraryController extends Controller
 
         $isBookmarked = false;
         if ($user) {
-            $isBookmarked = $user->bookmarks()->where('library_item_id', $item->id)->exists();
+            $isBookmarked = $item->bookmarks()->where('user_id', $user->id)->exists();
         }
 
         $relatedItems = LibraryItem::approved()
             ->where('id', '!=', $item->id)
             ->where(function ($q) use ($item) {
                 $q->where('type', $item->type)
-                  ->orWhere('category', $item->category);
+                    ->orWhere('category', $item->category);
             })
             ->latest()
             ->take(3)
