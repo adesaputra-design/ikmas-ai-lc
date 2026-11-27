@@ -31,6 +31,7 @@ Route::get('/tentang', [\App\Http\Controllers\TentangController::class, 'index']
 // Modul Pustaka AI (Library)
 Route::get('/library', [\App\Http\Controllers\LibraryController::class, 'index'])->name('library.index');
 Route::get('/library/{slug}/bab/{chapter}', [EbookController::class, 'chapter'])->name('library.ebook.chapter');
+Route::post('/library/{slug}/progress', [EbookController::class, 'saveChecklist'])->middleware('auth')->name('library.ebook.progress');
 Route::get('/library/{slug}', [\App\Http\Controllers\LibraryController::class, 'show'])->name('library.show');
 
 
