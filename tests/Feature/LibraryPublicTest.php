@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Bookmark;
 use App\Models\LibraryItem;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -108,6 +109,29 @@ class LibraryPublicTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('KONTEN RESUME LENGKAP UNTUK MEMBER ALUMNI.');
         $response->assertDontSee('Konten Eksklusif Member');
+    }
+
+    public function test_member_sees_saved_library_bookmark_on_detail_page(): void
+    {
+        $member = User::factory()->create(['role' => 'member']);
+        $book = LibraryItem::create([
+            'title' => 'Buku Tersimpan',
+            'slug' => 'buku-tersimpan',
+            'type' => 'book',
+            'summary_preview' => 'Sinopsis buku.',
+            'status' => 'approved',
+        ]);
+
+        Bookmark::create([
+            'user_id' => $member->id,
+            'bookmarkable_id' => $book->id,
+            'bookmarkable_type' => 'library',
+        ]);
+
+        $this->actingAs($member)
+            ->get("/library/{$book->slug}")
+            ->assertOk()
+            ->assertSee('Hapus dari Bookmark');
     }
 
     public function test_unapproved_library_item_returns_404_for_public(): void

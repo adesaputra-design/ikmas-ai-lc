@@ -2,7 +2,12 @@
 
 // 1. Theme Management (Dual Theme: Light / Dark)
 (function initTheme() {
-    const savedTheme = localStorage.getItem('ikmas_theme');
+    let savedTheme = null;
+    try {
+        savedTheme = localStorage.getItem('ikmas_theme');
+    } catch {
+        // Use the operating system preference when browser storage is blocked.
+    }
     const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     const initialTheme = savedTheme ? savedTheme : (prefersDark ? 'dark' : 'light');
     
@@ -50,7 +55,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const nextTheme = current === 'dark' ? 'light' : 'dark';
             
             document.documentElement.setAttribute('data-theme', nextTheme);
-            localStorage.setItem('ikmas_theme', nextTheme);
+            try {
+                localStorage.setItem('ikmas_theme', nextTheme);
+            } catch {
+                // The theme still changes for this page view.
+            }
             updateThemeIcon(nextTheme);
         });
     }

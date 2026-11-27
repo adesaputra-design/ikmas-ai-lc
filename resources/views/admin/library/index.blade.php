@@ -77,6 +77,10 @@
                class="btn btn-sm {{ $tab === 'academic' ? 'btn-primary' : 'btn-secondary' }}">
                 🎓 Karya Ilmiah ({{ $academicCount }})
             </a>
+            <a href="{{ route('admin.library.index', ['tab' => 'ebook']) }}"
+               class="btn btn-sm {{ $tab === 'ebook' ? 'btn-primary' : 'btn-secondary' }}">
+                📖 Ebook ({{ $ebookCount }})
+            </a>
         </div>
 
         <!-- Search Bar -->
@@ -119,7 +123,7 @@
                                     <span class="badge badge-amber">{{ $item->degree_label }}</span>
                                 @endif
                                 <span class="badge {{ $item->status === 'approved' ? 'badge-emerald' : ($item->status === 'pending' ? 'badge-amber' : 'badge-secondary') }}" style="{{ $item->status === 'rejected' ? 'background: rgba(239,68,68,0.1); color: #ef4444;' : '' }}">
-                                    {{ $item->status === 'approved' ? '✓ Terbit' : ($item->status === 'pending' ? '⏳ Menunggu Review' : '✕ Ditolak') }}
+                                    {{ $item->isEbook() ? ($item->is_public ? '✓ Terbit' : 'Draf Privat') : ($item->status === 'approved' ? '✓ Terbit' : ($item->status === 'pending' ? '⏳ Menunggu Review' : '✕ Ditolak')) }}
                                 </span>
                                 @if($item->is_featured)
                                     <span class="badge badge-amber">⭐ Unggulan</span>
@@ -127,7 +131,7 @@
                             </div>
 
                             <h3 style="font-size: 1.2rem; font-weight: 800; margin: 0 0 0.25rem 0; line-height: 1.3;">
-                                <a href="{{ url('/library/' . $item->slug) }}" target="_blank" style="color: inherit; text-decoration: none;">
+                                <a href="{{ $item->isEbook() ? route('admin.library.ebook.preview', $item) : url('/library/' . $item->slug) }}" target="_blank" style="color: inherit; text-decoration: none;">
                                     {{ $item->title }}
                                 </a>
                             </h3>
@@ -142,6 +146,8 @@
                                     @if($item->user)
                                         <span style="margin-left: 0.5rem; color: var(--primary); font-weight: 600;">(Alumni: {{ $item->user->name }} - {{ $item->user->alumni_year ?? 'Member' }})</span>
                                     @endif
+                                @elseif($item->isEbook())
+                                    {{ $item->series_name }} · Edisi #{{ $item->edition_number }}
                                 @endif
                             </div>
 
@@ -159,9 +165,13 @@
 
                     <!-- Actions Buttons -->
                     <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-                        <a href="{{ url('/library/' . $item->slug) }}" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 0.8rem;">
-                            Lihat ↗
+                        <a href="{{ $item->isEbook() ? route('admin.library.ebook.preview', $item) : url('/library/' . $item->slug) }}" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 0.8rem;">
+                            {{ $item->isEbook() ? 'Pratinjau ↗' : 'Lihat ↗' }}
                         </a>
+
+                        @if($item->isEbook())
+                            <a href="{{ route('admin.library.ebook.chapters.create', $item) }}" class="btn btn-secondary btn-sm">Tambah Bab</a>
+                        @endif
 
                         <a href="{{ route('admin.library.edit', $item->id) }}" class="btn btn-secondary btn-sm" style="font-size: 0.8rem;">
                             Edit
