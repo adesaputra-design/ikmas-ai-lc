@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Pustaka AI — Rangkuman Buku, Podcast & Karya Ilmiah Alumni IKMAS')
+@section('title', 'Pustaka AI — Buku, Podcast, Ebook & Karya Ilmiah Alumni IKMAS')
 
 @section('content')
 <div class="container" style="padding-top: 3rem; padding-bottom: 5rem;">
@@ -11,7 +11,7 @@
             Pustaka <span class="text-gradient">AI</span> IKMAS
         </h1>
         <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.6;">
-            Koleksi kurasi intisari buku-buku AI & teknologi terbaik, resume podcast masa depan, serta arsip karya ilmiah (jurnal, tesis, disertasi) karya alumni Assalaam.
+            Koleksi kurasi buku, podcast, ebook, dan karya ilmiah alumni Assalaam.
         </p>
     </div>
 
@@ -48,6 +48,16 @@
         </div>
 
         <div class="card" style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 2.75rem; height: 2.75rem; border-radius: var(--radius-md); background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                📖
+            </div>
+            <div>
+                <div style="font-size: 1.4rem; font-weight: 800; color: var(--text-main);">{{ $stats['ebooks'] }}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Ebook</div>
+            </div>
+        </div>
+
+        <div class="card" style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
             <div style="width: 2.75rem; height: 2.75rem; border-radius: var(--radius-md); background: rgba(16,185,129,0.1); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
                 ✨
             </div>
@@ -80,6 +90,10 @@
                        class="btn btn-sm {{ request('type') === 'academic' ? 'btn-primary' : 'btn-secondary' }}">
                         🎓 Karya Ilmiah
                     </a>
+                    <a href="{{ route('library.index', array_merge(request()->except('page'), ['type' => 'ebook'])) }}"
+                       class="btn btn-sm {{ request('type') === 'ebook' ? 'btn-primary' : 'btn-secondary' }}">
+                        📖 Ebook
+                    </a>
                 </div>
 
                 <!-- Search Input -->
@@ -98,6 +112,29 @@
                     @endif
                 </div>
             </div>
+
+                @if(request('type') === 'ebook')
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+                        <label style="display: grid; gap: 0.25rem; font-size: 0.8rem; color: var(--text-muted);">
+                            Seri
+                            <select name="series" style="min-width: 12rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); color: var(--text-main);">
+                                <option value="">Semua seri</option>
+                                @foreach($ebookSeries as $series)
+                                    <option value="{{ $series }}" @selected(request('series') === $series)>{{ $series }}</option>
+                                @endforeach
+                            </select>
+                        </label>
+                        <label style="display: grid; gap: 0.25rem; font-size: 0.8rem; color: var(--text-muted);">
+                            Edisi
+                            <select name="edition" style="min-width: 8rem; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); color: var(--text-main);">
+                                <option value="">Semua edisi</option>
+                                @foreach($ebookEditions as $edition)
+                                    <option value="{{ $edition }}" @selected((string) request('edition') === (string) $edition)>#{{ $edition }}</option>
+                                @endforeach
+                            </select>
+                        </label>
+                    </div>
+                @endif
 
             <!-- Categories Chips -->
             @if($categories->count() > 0)
@@ -127,13 +164,13 @@
             <!-- Card Thumbnail / Header Cover -->
             @if($item->cover_image)
                 <div style="height: 180px; width: 100%; overflow: hidden; background: var(--bg-surface-alt); position: relative;">
-                    <img src="{{ asset($item->cover_image) }}" alt="{{ $item->title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="{{ asset('storage/' . $item->cover_image) }}" alt="Sampul {{ $item->title }}" style="width: 100%; height: 100%; object-fit: cover;">
                     <span class="badge {{ $item->type_badge['class'] }}" style="position: absolute; top: 0.75rem; left: 0.75rem; font-size: 0.75rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
                         {{ $item->type_badge['icon'] }} {{ $item->type_badge['label'] }}
                     </span>
                 </div>
             @else
-                <div style="height: 130px; width: 100%; background: linear-gradient(135deg, rgba(37,99,235,0.1), rgba(6,182,212,0.1)); position: relative; display: flex; align-items: center; justify-content: center;">
+                <div style="height: 130px; width: 100%; background: {{ $item->isEbook() ? 'var(--primary-light)' : 'var(--bg-surface-alt)' }}; position: relative; display: flex; align-items: center; justify-content: center;">
                     <div style="font-size: 3rem; opacity: 0.3;">
                         {{ $item->type_badge['icon'] }}
                     </div>
@@ -191,6 +228,11 @@
                             • Oleh <strong style="color: var(--text-main);">{{ $item->user->name }}</strong>
                         @endif
                     </div>
+                @elseif($item->isEbook())
+                    <div style="font-size: 0.825rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                        {{ $item->series_name }} · Edisi #{{ $item->edition_number }}
+                        @if($item->author_name) · {{ $item->author_name }} @endif
+                    </div>
                 @endif
 
                 <p style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.25rem; flex: 1;">
@@ -204,7 +246,7 @@
                     </span>
                     <a href="{{ route('library.show', $item->slug) }}" class="btn btn-sm btn-primary" style="padding: 0.35rem 0.85rem; font-size: 0.8rem;">
                         @guest
-                            🔒 Buka Teaser
+                            {{ $item->isEbook() ? 'Baca Ebook →' : '🔒 Buka Teaser' }}
                         @else
                             Buka Materi →
                         @endguest
