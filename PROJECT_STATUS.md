@@ -19,7 +19,7 @@ These are verified as implemented in source, not as live or test-passing behavio
 - [VERIFIED] Pustaka AI models and migration support `book`, `podcast`, and `academic` items; feature tests cover catalog, filtering, and access behavior.
 
 # In Progress
-- [VERIFIED] Seri JARIB plan `plans/seri-jarib-ebook.md`: **Phases 1–2 are done** (draft + private preview; publish with editorial approval, public cover/chapters, catalog filter, bookmark). Phases 3–9 not started; next is Phase 3 (edit, delete, reorder chapters).
+- [VERIFIED] Seri JARIB plan `plans/seri-jarib-ebook.md`: **Phases 1–3 are done** (draft + private preview; publish with editorial approval, public cover/chapters, catalog filter, bookmark; edit/delete/reorder chapters with stable slugs and gap-free positions). Phases 4–9 not started; next is Phase 4 (mobile reading, font size, WhatsApp quote sharing).
 - [VERIFIED] Codex built a parallel Phase 1–2 in the main checkout (uncommitted, on `main`): duplicate migrations `2026_11_26_082536_create_library_chapters_table` and `2026_11_26_082538_add_ebook_fields_to_library_items_table`, `AdminEbookController`, `EbookController`, `public/css/ebook.css`, separate admin ebook views. Its Phase 2 behavior was ported onto the PR branch; those files were not. The main checkout must drop them before pulling the merged branch, or the duplicate migrations will create `library_chapters` twice.
 - [VERIFIED] Raw source for edition #1 is the Google Doc "Ghomsony - Closing Maksimal dengan 5 PRINSIP JARIB" (id `1YBHPUs5LSli0zmAfLkJhQ9TWLQlCKOCXabx0-toMr8k`): interview transcript + draft v1. Draft v1 contains many quotes/anecdotes not in the transcript (most Bab 4–5 quotes, Bab 6 Q&A answers, the Rp16 juta story is reversed) and unsourced statistics. Naskah v2 has not been written; speaker approval of quotes is still required before publishing.
 
@@ -28,7 +28,7 @@ These are verified as implemented in source, not as live or test-passing behavio
 - [VERIFIED] Pint reports pre-existing style deviations in `LibraryItem.php` and `AdminLibraryController.php`; new files pass. Not reformatted to keep diffs focused.
 
 # Next Priorities
-1. Merge PR adesaputra-design/ikmas-ai-lc#1, clean the duplicate Codex files from the main checkout, then Seri JARIB Phase 3 (edit, delete, reorder chapters).
+1. Merge PR adesaputra-design/ikmas-ai-lc#1, clean the duplicate Codex files from the main checkout, then Seri JARIB Phase 4 (mobile reading, font size, WhatsApp quote sharing).
 2. Draft Naskah v2 from the transcript only, mark unverified claims `[CEK: …]`, and get speaker approval before seeding edition #1.
 3. Confirm production PHP >=8.4 and Hostinger deployment configuration before deploying.
 
@@ -42,12 +42,12 @@ These are verified as implemented in source, not as live or test-passing behavio
 - `.env` exists locally and should not be copied into documentation. Reported production URL: `https://ai.ikmas.com/` on Hostinger. Hosting configuration and production settings remain unverified.
 
 # Last Session Summary
-- **Task:** Continue Codex's parallel work by porting Seri JARIB Phase 2 onto the PR branch (Phase 1 was committed earlier in `935e5e9`).
-- **Changes:** `LibraryItem::visibleToPublic()`; `LibraryController` ebook cover + `chapter()`; public route `library.ebook.chapter`; `AdminLibraryChapterController::publish()` with an editorial-approval checkbox on Kelola Bab; generic approve and the edit form's status can no longer publish an ebook; `is_public` checkbox removed from the item form; `/library` gets Ebook tab, stat card, series/edition line, guest "Baca Ebook" label, fixed cover image path; admin list shows Draf Privat/Terbit and series info; `tests/Feature/EbookPublicTest.php` (8 tests).
-- **Verification:** Full suite 130/130 passed; Pint clean. Browser on localhost: publish refused without the editorial checkbox and accepted with it; as guest, ebook listed under `/library?type=ebook`, public cover and chapter open with no preview bar and no script.
-- **Result:** Phase 2 acceptance criteria met on branch `claude/cek-project-folder-ec3dd5` (PR #1). Codex's duplicate Phase 1 files in the main checkout were intentionally not ported.
+- **Task:** Seri JARIB Phase 3: edit, delete, and reorder chapters (Phases 1–2 are in `935e5e9` and `3d0d58d`).
+- **Changes:** `LibraryChapter::move()` swaps a chapter with its neighbour inside a transaction (position 0 as a temporary slot); the `deleted` event closes the position gap. `AdminLibraryChapterController` gains `edit`, `update`, `move`, `destroy` with shared validation; four admin routes under `scopeBindings()` so a chapter of another ebook returns 404. Chapter slug stays fixed when the title changes. Form fields extracted to `admin/library/_chapter-fields.blade.php`; new `admin/library/chapter-edit.blade.php`; Kelola Bab rows get ↑ ↓, Edit, and Hapus (with confirmation); `tests/Feature/EbookChapterManagementTest.php` (7 tests).
+- **Verification:** Full suite 137/137 passed; Pint clean. Browser on localhost: moved a chapter up, edited title and body (URL unchanged), deleted the middle chapter; public cover showed the new order and total reading time.
+- **Result:** Phase 3 acceptance criteria met on branch `claude/cek-project-folder-ec3dd5` (PR #1).
 - **Remaining Issues:** Main checkout still holds Codex's uncommitted duplicate implementation; MySQL migration untested; Naskah v2 not written; production PHP version unknown.
-- **Recommended Next Step:** Merge PR #1 and clean the main checkout, then Phase 3.
+- **Recommended Next Step:** Phase 4 (mobile reading, font size, WhatsApp quote sharing), or merge PR #1 first.
 
 # Last Updated
-2026-11-26 (Asia/Jakarta)
+2026-11-27 (Asia/Jakarta)

@@ -143,5 +143,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/library/{item}/preview', [AdminLibraryChapterController::class, 'preview'])->name('library.preview');
         Route::get('/library/{item}/preview/bab/{chapterSlug}', [AdminLibraryChapterController::class, 'previewChapter'])->name('library.preview.chapter');
         Route::post('/library/{item}/publish', [AdminLibraryChapterController::class, 'publish'])->name('library.publish');
+        Route::scopeBindings()->group(function () {
+            Route::get('/library/{item}/chapters/{chapter}/edit', [AdminLibraryChapterController::class, 'edit'])->name('library.chapters.edit');
+            Route::put('/library/{item}/chapters/{chapter}', [AdminLibraryChapterController::class, 'update'])->name('library.chapters.update');
+            Route::post('/library/{item}/chapters/{chapter}/move', [AdminLibraryChapterController::class, 'move'])->name('library.chapters.move');
+            Route::delete('/library/{item}/chapters/{chapter}', [AdminLibraryChapterController::class, 'destroy'])->name('library.chapters.destroy');
+        });
     });
 });

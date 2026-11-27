@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class LibraryChapter extends Model
@@ -42,12 +43,49 @@ class LibraryChapter extends Model
         });
 
         static::saved(fn (LibraryChapter $chapter) => $chapter->item->syncReadingTime());
-        static::deleted(fn (LibraryChapter $chapter) => $chapter->item->syncReadingTime());
+
+        static::deleted(function (LibraryChapter $chapter) {
+            // Ascending order so each chapter moves into a slot that is already free.
+            static::where('library_item_id', $chapter->library_item_id)
+                ->where('position', '>', $chapter->position)
+                ->orderBy('position')
+                ->get(['id', 'position'])
+                ->each(fn (LibraryChapter $later) => static::whereKey($later->id)->update(['position' => $later->position - 1]));
+
+            $chapter->item->syncReadingTime();
+        });
     }
 
     public function item(): BelongsTo
     {
         return $this->belongsTo(LibraryItem::class, 'library_item_id');
+    }
+
+    /**
+     * Swap this chapter with its neighbour; a move past either end leaves the order unchanged.
+     */
+    public function move(string $direction): void
+    {
+        DB::transaction(function () use ($direction) {
+            $current = static::whereKey($this->id)->lockForUpdate()->firstOrFail();
+
+            $neighbour = static::where('library_item_id', $current->library_item_id)
+                ->where('position', $direction === 'up' ? '<' : '>', $current->position)
+                ->orderBy('position', $direction === 'up' ? 'desc' : 'asc')
+                ->lockForUpdate()
+                ->first();
+
+            if (! $neighbour) {
+                return;
+            }
+
+            // Position 0 is never assigned, so it can hold a chapter while the unique (item, position) slot is swapped.
+            static::whereKey($current->id)->update(['position' => 0]);
+            static::whereKey($neighbour->id)->update(['position' => $current->position]);
+            static::whereKey($current->id)->update(['position' => $neighbour->position]);
+
+            $this->position = $neighbour->position;
+        });
     }
 
     public function calculateReadingMinutes(): int
