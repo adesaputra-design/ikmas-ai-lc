@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminEbookController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EbookController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LearningMaterialController;
@@ -28,6 +30,7 @@ Route::get('/tentang', [\App\Http\Controllers\TentangController::class, 'index']
 
 // Modul Pustaka AI (Library)
 Route::get('/library', [\App\Http\Controllers\LibraryController::class, 'index'])->name('library.index');
+Route::get('/library/{slug}/bab/{chapter}', [EbookController::class, 'chapter'])->name('library.ebook.chapter');
 Route::get('/library/{slug}', [\App\Http\Controllers\LibraryController::class, 'show'])->name('library.show');
 
 
@@ -121,6 +124,16 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Modul Pustaka AI & Kurasi Karya Ilmiah
     Route::middleware('permission:library')->group(function () {
+        Route::get('/library/{item}/chapters/create', [AdminEbookController::class, 'createChapter'])->name('library.ebook.chapters.create');
+        Route::post('/library/{item}/chapters', [AdminEbookController::class, 'storeChapter'])->name('library.ebook.chapters.store');
+        Route::get('/library/{item}/chapters/{chapter}/edit', [AdminEbookController::class, 'editChapter'])->name('library.ebook.chapters.edit');
+        Route::put('/library/{item}/chapters/{chapter}', [AdminEbookController::class, 'updateChapter'])->name('library.ebook.chapters.update');
+        Route::delete('/library/{item}/chapters/{chapter}', [AdminEbookController::class, 'destroyChapter'])->name('library.ebook.chapters.destroy');
+        Route::post('/library/{item}/chapters/{chapter}/move-up', [AdminEbookController::class, 'moveChapterUp'])->name('library.ebook.chapters.move-up');
+        Route::post('/library/{item}/chapters/{chapter}/move-down', [AdminEbookController::class, 'moveChapterDown'])->name('library.ebook.chapters.move-down');
+        Route::get('/library/{item}/preview', [AdminEbookController::class, 'preview'])->name('library.ebook.preview');
+        Route::get('/library/{item}/preview/bab/{chapter}', [AdminEbookController::class, 'previewChapter'])->name('library.ebook.preview.chapter');
+        Route::post('/library/{item}/publish', [AdminEbookController::class, 'publish'])->name('library.ebook.publish');
         Route::resource('library', \App\Http\Controllers\Admin\AdminLibraryController::class)->parameters(['library' => 'item']);
         Route::post('/library/{item}/approve', [\App\Http\Controllers\Admin\AdminLibraryController::class, 'approve'])->name('library.approve');
         Route::post('/library/{item}/reject', [\App\Http\Controllers\Admin\AdminLibraryController::class, 'reject'])->name('library.reject');

@@ -9,11 +9,17 @@
         <a href="{{ route('admin.library.index') }}" class="btn btn-secondary btn-sm">
             ← Kembali ke Pustaka
         </a>
+        @if($isEdit && $item->isEbook())
+            <div style="display: flex; gap: 0.5rem;">
+                <a href="{{ route('admin.library.ebook.chapters.create', $item) }}" class="btn btn-secondary btn-sm">Tambah Bab</a>
+                <a href="{{ route('admin.library.ebook.preview', $item) }}" class="btn btn-primary btn-sm">Pratinjau Draf</a>
+            </div>
+        @endif
     </div>
 
     <div class="card" style="padding: 2rem;">
         <h2 style="font-size: 1.35rem; font-weight: 800; margin-bottom: 0.5rem;">
-            {{ $isEdit ? 'Edit Informasi Pustaka: ' . $item->title : 'Tambah Koleksi Buku / Podcast / Jurnal' }}
+            {{ $isEdit ? 'Edit Informasi Pustaka: ' . $item->title : 'Tambah Koleksi Buku / Podcast / Jurnal / Ebook' }}
         </h2>
         <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;">
             Rangkuman buku dan resume podcast dapat dibuat langsung oleh pengurus/admin untuk memperkaya khazanah AI alumni.
@@ -53,8 +59,28 @@
                         <option value="book" {{ old('type', 'book') === 'book' ? 'selected' : '' }}>📚 Rangkuman Buku (Book Summary)</option>
                         <option value="podcast" {{ old('type') === 'podcast' ? 'selected' : '' }}>🎙️ Resume Podcast AI</option>
                         <option value="academic" {{ old('type') === 'academic' ? 'selected' : '' }}>🎓 Karya Ilmiah / Jurnal / Tesis Alumni</option>
+                        <option value="ebook" {{ old('type') === 'ebook' ? 'selected' : '' }}>📖 Ebook</option>
                     </select>
                 @endif
+            </div>
+
+            <div id="section-ebook" style="display: {{ old('type', $item->type ?? 'book') === 'ebook' ? 'block' : 'none' }}; background: var(--bg-surface-alt); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <div style="font-weight: 800; margin-bottom: 1rem; color: var(--primary);">Metadata Ebook</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div>
+                        <label for="series_name">Nama Seri *</label>
+                        <input id="series_name" name="series_name" type="text" value="{{ old('series_name', $item->series_name) }}" style="width: 100%; padding: 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); color: var(--text-main);">
+                    </div>
+                    <div>
+                        <label for="edition_number">Nomor Edisi *</label>
+                        <input id="edition_number" name="edition_number" type="number" min="1" value="{{ old('edition_number', $item->edition_number) }}" style="width: 100%; padding: 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); color: var(--text-main);">
+                    </div>
+                    <div>
+                        <label for="ebook_author_name">Penulis / Narasumber</label>
+                        <input id="ebook_author_name" name="ebook_author_name" type="text" value="{{ old('ebook_author_name', $item->author_name) }}" style="width: 100%; padding: 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); color: var(--text-main);">
+                    </div>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin: 1rem 0 0;">Ebook disimpan sebagai draf privat. Penerbitan tersedia pada fase berikutnya.</p>
             </div>
 
             <!-- Title -->
@@ -182,7 +208,7 @@
             </div>
 
             <!-- Content (Full summary / Key takeaways - Gated) -->
-            <div>
+            <div id="section-content" style="display: {{ old('type', $item->type ?? 'book') === 'ebook' ? 'none' : 'block' }};">
                 <label for="content" style="display: block; font-size: 0.875rem; font-weight: 700; margin-bottom: 0.35rem;">
                     Ulasan Lengkap / Poin-Poin Kunci / Transkrip (Eksklusif Member Alumni & Subscriber)
                 </label>
@@ -216,9 +242,13 @@
                         <div style="border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
                             <label for="status" style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.25rem;">Status Publikasi</label>
                             <select id="status" name="status" style="width: 100%; padding: 0.4rem 0.6rem; font-size: 0.85rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); color: var(--text-main);">
+                                @if($item->isEbook())
+                                <option value="{{ $item->status }}">{{ $item->is_public ? 'Terbit' : 'Draf Privat' }}</option>
+                                @else
                                 <option value="approved" {{ old('status', $item->status) === 'approved' ? 'selected' : '' }}>Disetujui / Terbit</option>
                                 <option value="pending" {{ old('status', $item->status) === 'pending' ? 'selected' : '' }}>Menunggu Kurasi</option>
                                 <option value="rejected" {{ old('status', $item->status) === 'rejected' ? 'selected' : '' }}>Ditolak / Perlu Revisi</option>
+                                @endif
                             </select>
                         </div>
                     @endif
@@ -230,7 +260,7 @@
                 <a href="{{ route('admin.library.index') }}" class="btn btn-secondary">
                     Batal
                 </a>
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" id="submit-library" class="btn btn-primary">
                     {{ $isEdit ? 'Simpan Perubahan' : 'Terbitkan ke Pustaka AI' }}
                 </button>
             </div>
@@ -243,10 +273,16 @@ function toggleTypeFields(type) {
     const bookSec = document.getElementById('section-book');
     const podSec = document.getElementById('section-podcast');
     const acadSec = document.getElementById('section-academic');
+    const ebookSec = document.getElementById('section-ebook');
+    const contentSec = document.getElementById('section-content');
+    const submit = document.getElementById('submit-library');
 
     if (bookSec) bookSec.style.display = (type === 'book') ? 'block' : 'none';
     if (podSec) podSec.style.display = (type === 'podcast') ? 'block' : 'none';
     if (acadSec) acadSec.style.display = (type === 'academic') ? 'block' : 'none';
+    if (ebookSec) ebookSec.style.display = (type === 'ebook') ? 'block' : 'none';
+    if (contentSec) contentSec.style.display = (type === 'ebook') ? 'none' : 'block';
+    if (submit && !{{ $isEdit ? 'true' : 'false' }}) submit.textContent = type === 'ebook' ? 'Simpan Draf Ebook' : 'Terbitkan ke Pustaka AI';
 }
 </script>
 @endsection
