@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,6 +23,9 @@ class LibraryItem extends Model
         'content',
         'author_name',
         'reading_time',
+        'series_name',
+        'edition_number',
+        'is_public',
         'podcast_source',
         'media_embed_url',
         'duration',
@@ -42,6 +46,8 @@ class LibraryItem extends Model
     {
         return [
             'is_featured' => 'boolean',
+            'is_public' => 'boolean',
+            'edition_number' => 'integer',
             'publication_year' => 'integer',
             'views_count' => 'integer',
         ];
@@ -54,7 +60,20 @@ class LibraryItem extends Model
 
     public function bookmarks(): HasMany
     {
-        return $this->hasMany(Bookmark::class);
+        return $this->hasMany(Bookmark::class, 'bookmarkable_id')
+            ->where('bookmarkable_type', 'library');
+    }
+
+    public function chapters(): HasMany
+    {
+        return $this->hasMany(LibraryChapter::class)->orderBy('position');
+    }
+
+    public function syncReadingTime(): void
+    {
+        $minutes = (int) $this->chapters()->sum('reading_minutes');
+
+        $this->update(['reading_time' => $minutes > 0 ? "{$minutes} menit" : null]);
     }
 
     // Scopes
@@ -63,11 +82,22 @@ class LibraryItem extends Model
         return $query->where('status', 'approved');
     }
 
+    /**
+     * Approved items, excluding ebooks that have not been published to the public.
+     */
+    public function scopeVisibleToPublic(Builder $query): Builder
+    {
+        return $query->approved()->where(function (Builder $query): void {
+            $query->where('type', '!=', 'ebook')->orWhere('is_public', true);
+        });
+    }
+
     public function scopeByType($query, ?string $type)
     {
-        if ($type && in_array($type, ['book', 'podcast', 'academic'])) {
+        if ($type && in_array($type, ['book', 'podcast', 'academic', 'ebook'])) {
             return $query->where('type', $type);
         }
+
         return $query;
     }
 
@@ -76,6 +106,7 @@ class LibraryItem extends Model
         if ($category) {
             return $query->where('category', $category);
         }
+
         return $query;
     }
 
@@ -98,6 +129,11 @@ class LibraryItem extends Model
     public function isAcademic(): bool
     {
         return $this->type === 'academic';
+    }
+
+    public function isEbook(): bool
+    {
+        return $this->type === 'ebook';
     }
 
     public function isApproved(): bool
@@ -134,6 +170,11 @@ class LibraryItem extends Model
                 'icon' => '🎓',
                 'class' => 'badge-amber',
             ],
+            'ebook' => [
+                'label' => 'Ebook Interaktif',
+                'icon' => '📖',
+                'class' => 'badge-emerald',
+            ],
             default => [
                 'label' => 'Pustaka AI',
                 'icon' => '📖',
@@ -155,7 +196,7 @@ class LibraryItem extends Model
 
     public function getEmbedHtmlAttribute(): ?string
     {
-        if (!$this->media_embed_url) {
+        if (! $this->media_embed_url) {
             return null;
         }
 
@@ -164,17 +205,19 @@ class LibraryItem extends Model
         // YouTube Embed
         if (preg_match('/(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]+)/i', $url, $matches)) {
             $videoId = $matches[1];
-            return '<iframe width="100%" height="315" src="https://www.youtube.com/embed/' . $videoId . '" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="border-radius: var(--radius-md);"></iframe>';
+
+            return '<iframe width="100%" height="315" src="https://www.youtube.com/embed/'.$videoId.'" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="border-radius: var(--radius-md);"></iframe>';
         }
 
         // Spotify Embed
         if (str_contains($url, 'spotify.com')) {
-            if (!str_contains($url, '/embed/')) {
+            if (! str_contains($url, '/embed/')) {
                 $spotifyUrl = preg_replace('/spotify\.com\/(episode|track|show)\//', 'spotify.com/embed/$1/', $url);
             } else {
                 $spotifyUrl = $url;
             }
-            return '<iframe style="border-radius: 12px;" src="' . htmlspecialchars($spotifyUrl) . '" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>';
+
+            return '<iframe style="border-radius: 12px;" src="'.htmlspecialchars($spotifyUrl).'" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>';
         }
 
         return null;

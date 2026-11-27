@@ -19,17 +19,17 @@ class AdminLibraryController extends Controller
 
         if ($tab === 'curation') {
             $query->where('type', 'academic')->where('status', 'pending');
-        } elseif (in_array($tab, ['book', 'podcast', 'academic'])) {
+        } elseif (in_array($tab, ['book', 'podcast', 'academic', 'ebook'])) {
             $query->where('type', $tab);
         }
 
         if ($q) {
             $query->where(function ($sq) use ($q) {
                 $sq->where('title', 'like', "%{$q}%")
-                   ->orWhere('author_name', 'like', "%{$q}%")
-                   ->orWhere('podcast_source', 'like', "%{$q}%")
-                   ->orWhere('institution', 'like', "%{$q}%")
-                   ->orWhere('category', 'like', "%{$q}%");
+                    ->orWhere('author_name', 'like', "%{$q}%")
+                    ->orWhere('podcast_source', 'like', "%{$q}%")
+                    ->orWhere('institution', 'like', "%{$q}%")
+                    ->orWhere('category', 'like', "%{$q}%");
             });
         }
 
@@ -39,6 +39,7 @@ class AdminLibraryController extends Controller
         $bookCount = LibraryItem::where('type', 'book')->count();
         $podcastCount = LibraryItem::where('type', 'podcast')->count();
         $academicCount = LibraryItem::where('type', 'academic')->where('status', 'approved')->count();
+        $ebookCount = LibraryItem::where('type', 'ebook')->count();
 
         return view('admin.library.index', compact(
             'items',
@@ -47,14 +48,15 @@ class AdminLibraryController extends Controller
             'pendingCount',
             'bookCount',
             'podcastCount',
-            'academicCount'
+            'academicCount',
+            'ebookCount'
         ));
     }
 
     public function create()
     {
         return view('admin.library.form', [
-            'item' => new LibraryItem(),
+            'item' => new LibraryItem,
             'isEdit' => false,
         ]);
     }
@@ -62,7 +64,7 @@ class AdminLibraryController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'type' => 'required|in:book,podcast,academic',
+            'type' => 'required|in:book,podcast,academic,ebook',
             'title' => 'required|string|max:255',
             'category' => 'required|string|max:60',
             'summary_preview' => 'required|string',
@@ -74,6 +76,10 @@ class AdminLibraryController extends Controller
             'author_name' => 'nullable|string|max:255',
             'reading_time' => 'nullable|string|max:50',
 
+            // Ebook fields
+            'series_name' => 'nullable|string|max:255',
+            'edition_number' => 'nullable|integer|min:1',
+
             // Podcast fields
             'podcast_source' => 'nullable|string|max:255',
             'media_embed_url' => 'nullable|url|max:500',
@@ -83,7 +89,7 @@ class AdminLibraryController extends Controller
             'academic_degree' => 'nullable|in:skripsi,tesis,disertasi,jurnal',
             'institution' => 'nullable|string|max:255',
             'co_authors' => 'nullable|string|max:255',
-            'publication_year' => 'nullable|integer|min:1900|max:' . (date('Y') + 1),
+            'publication_year' => 'nullable|integer|min:1900|max:'.(date('Y') + 1),
             'external_url' => 'nullable|url|max:500',
             'pdf_file' => 'nullable|mimes:pdf|max:15360',
         ]);
@@ -106,7 +112,7 @@ class AdminLibraryController extends Controller
             $filePath = $request->file('pdf_file')->store('academic_papers', 'public');
         }
 
-        $item = new LibraryItem();
+        $item = new LibraryItem;
         $item->user_id = auth()->id();
         $item->type = $validated['type'];
         $item->title = $validated['title'];
@@ -117,11 +123,14 @@ class AdminLibraryController extends Controller
         $item->cover_image = $coverPath;
         $item->file_path = $filePath;
         $item->is_featured = $request->boolean('is_featured');
-        $item->status = 'approved';
+        // Ebook selalu mulai sebagai draf agar bab bisa disusun dan dipratinjau sebelum terbit.
+        $item->status = $item->type === 'ebook' ? 'pending' : 'approved';
 
         if ($item->type === 'book') {
             $item->author_name = $validated['author_name'] ?? null;
             $item->reading_time = $validated['reading_time'] ?? null;
+        } elseif ($item->type === 'ebook') {
+            $this->fillEbookFields($item, $validated);
         } elseif ($item->type === 'podcast') {
             $item->podcast_source = $validated['podcast_source'] ?? null;
             $item->media_embed_url = $validated['media_embed_url'] ?? null;
@@ -136,7 +145,13 @@ class AdminLibraryController extends Controller
 
         $item->save();
 
+        if ($item->isEbook()) {
+            return redirect()->route('admin.library.chapters.index', $item)
+                ->with('success', "Draf ebook '{$item->title}' dibuat. Tambahkan bab lalu pratinjau sebelum diterbitkan.");
+        }
+
         $tab = $item->type;
+
         return redirect()->route('admin.library.index', ['tab' => $tab])
             ->with('success', "Konten '{$item->title}' berhasil ditambahkan ke Pustaka AI!");
     }
@@ -158,11 +173,15 @@ class AdminLibraryController extends Controller
             'content' => 'nullable|string',
             'cover_image' => 'nullable|image|max:3072',
             'is_featured' => 'nullable|boolean',
-            'status' => 'required|in:pending,approved,rejected',
+            'status' => $item->isEbook() ? 'nullable' : 'required|in:pending,approved,rejected',
 
             // Book fields
             'author_name' => 'nullable|string|max:255',
             'reading_time' => 'nullable|string|max:50',
+
+            // Ebook fields
+            'series_name' => 'nullable|string|max:255',
+            'edition_number' => 'nullable|integer|min:1',
 
             // Podcast fields
             'podcast_source' => 'nullable|string|max:255',
@@ -173,7 +192,7 @@ class AdminLibraryController extends Controller
             'academic_degree' => 'nullable|in:skripsi,tesis,disertasi,jurnal',
             'institution' => 'nullable|string|max:255',
             'co_authors' => 'nullable|string|max:255',
-            'publication_year' => 'nullable|integer|min:1900|max:' . (date('Y') + 1),
+            'publication_year' => 'nullable|integer|min:1900|max:'.(date('Y') + 1),
             'external_url' => 'nullable|url|max:500',
             'pdf_file' => 'nullable|mimes:pdf|max:15360',
             'rejection_note' => 'nullable|string',
@@ -184,8 +203,10 @@ class AdminLibraryController extends Controller
         $item->summary_preview = $validated['summary_preview'];
         $item->content = $validated['content'] ?? null;
         $item->is_featured = $request->boolean('is_featured');
-        $item->status = $validated['status'];
-        $item->rejection_note = $validated['rejection_note'] ?? null;
+        if (! $item->isEbook()) {
+            $item->status = $validated['status'];
+            $item->rejection_note = $validated['rejection_note'] ?? null;
+        }
 
         if ($request->hasFile('cover_image')) {
             if ($item->cover_image && Storage::disk('public')->exists($item->cover_image)) {
@@ -204,6 +225,8 @@ class AdminLibraryController extends Controller
         if ($item->type === 'book') {
             $item->author_name = $validated['author_name'] ?? null;
             $item->reading_time = $validated['reading_time'] ?? null;
+        } elseif ($item->type === 'ebook') {
+            $this->fillEbookFields($item, $validated);
         } elseif ($item->type === 'podcast') {
             $item->podcast_source = $validated['podcast_source'] ?? null;
             $item->media_embed_url = $validated['media_embed_url'] ?? null;
@@ -222,8 +245,21 @@ class AdminLibraryController extends Controller
             ->with('success', "Item '{$item->title}' berhasil diperbarui!");
     }
 
+    /**
+     * @param  array<string, mixed>  $validated
+     */
+    private function fillEbookFields(LibraryItem $item, array $validated): void
+    {
+        $item->author_name = $validated['author_name'] ?? null;
+        $item->series_name = $validated['series_name'] ?? null;
+        $item->edition_number = $validated['edition_number'] ?? null;
+    }
+
     public function approve(LibraryItem $item)
     {
+        // Ebook hanya terbit lewat publish(), yang mewajibkan persetujuan editorial.
+        abort_if($item->isEbook(), 404);
+
         $item->update([
             'status' => 'approved',
             'rejection_note' => null,

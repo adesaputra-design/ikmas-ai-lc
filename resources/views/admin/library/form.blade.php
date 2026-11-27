@@ -53,6 +53,7 @@
                         <option value="book" {{ old('type', 'book') === 'book' ? 'selected' : '' }}>📚 Rangkuman Buku (Book Summary)</option>
                         <option value="podcast" {{ old('type') === 'podcast' ? 'selected' : '' }}>🎙️ Resume Podcast AI</option>
                         <option value="academic" {{ old('type') === 'academic' ? 'selected' : '' }}>🎓 Karya Ilmiah / Jurnal / Tesis Alumni</option>
+                        <option value="ebook" {{ old('type') === 'ebook' ? 'selected' : '' }}>📖 Ebook Interaktif (per bab, mulai sebagai draf)</option>
                     </select>
                 @endif
             </div>
@@ -94,6 +95,34 @@
                                style="width: 100%; padding: 0.55rem 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); color: var(--text-main);">
                     </div>
                 </div>
+            </div>
+
+            <!-- Dynamic Section: EBOOK FIELDS -->
+            <div id="section-ebook" style="display: {{ old('type', $item->type ?? 'book') === 'ebook' ? 'block' : 'none' }}; background: var(--bg-surface-alt); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <div style="font-weight: 800; font-size: 0.95rem; margin-bottom: 1rem; color: var(--accent-emerald);">
+                    📖 Metadata Ebook
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div>
+                        <label for="ebook_author_name" style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.35rem;">Narasumber / Penulis</label>
+                        <input type="text" id="ebook_author_name" name="author_name" value="{{ old('author_name', $item->author_name) }}" placeholder="Ir. Ghomsony"
+                               {{ old('type', $item->type ?? 'book') === 'ebook' ? '' : 'disabled' }}
+                               style="width: 100%; padding: 0.55rem 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); color: var(--text-main);">
+                    </div>
+                    <div>
+                        <label for="series_name" style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.35rem;">Nama Seri</label>
+                        <input type="text" id="series_name" name="series_name" value="{{ old('series_name', $item->series_name) }}" placeholder="Seri JARIB"
+                               style="width: 100%; padding: 0.55rem 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); color: var(--text-main);">
+                    </div>
+                    <div>
+                        <label for="edition_number" style="display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.35rem;">Nomor Edisi</label>
+                        <input type="number" min="1" id="edition_number" name="edition_number" value="{{ old('edition_number', $item->edition_number) }}" placeholder="1"
+                               style="width: 100%; padding: 0.55rem 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); color: var(--text-main);">
+                    </div>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.75rem 0 0;">
+                    Waktu baca dihitung otomatis dari bab. Bab dikelola dan ebook diterbitkan dari halaman "Kelola Bab" setelah draf disimpan.
+                </p>
             </div>
 
             <!-- Dynamic Section: PODCAST FIELDS -->
@@ -212,7 +241,12 @@
                         <span style="font-weight: 700;">⭐ Jadikan Koleksi Unggulan</span>
                     </label>
 
-                    @if($isEdit)
+                    @if($isEdit && $item->isEbook())
+                        <div style="border-top: 1px solid var(--border-color); padding-top: 0.75rem; font-size: 0.8rem; color: var(--text-muted);">
+                            Status: <strong>{{ $item->is_public && $item->isApproved() ? 'Terbit' : 'Draf privat' }}</strong>. Ebook diterbitkan dari halaman
+                            <a href="{{ route('admin.library.chapters.index', $item) }}">Kelola Bab</a>.
+                        </div>
+                    @elseif($isEdit)
                         <div style="border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
                             <label for="status" style="display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.25rem;">Status Publikasi</label>
                             <select id="status" name="status" style="width: 100%; padding: 0.4rem 0.6rem; font-size: 0.85rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); color: var(--text-main);">
@@ -230,8 +264,8 @@
                 <a href="{{ route('admin.library.index') }}" class="btn btn-secondary">
                     Batal
                 </a>
-                <button type="submit" class="btn btn-primary">
-                    {{ $isEdit ? 'Simpan Perubahan' : 'Terbitkan ke Pustaka AI' }}
+                <button type="submit" class="btn btn-primary" id="submit-button">
+                    {{ $isEdit ? 'Simpan Perubahan' : (old('type') === 'ebook' ? 'Simpan Draf Ebook' : 'Terbitkan ke Pustaka AI') }}
                 </button>
             </div>
         </form>
@@ -243,7 +277,15 @@ function toggleTypeFields(type) {
     const bookSec = document.getElementById('section-book');
     const podSec = document.getElementById('section-podcast');
     const acadSec = document.getElementById('section-academic');
+    const ebookSec = document.getElementById('section-ebook');
 
+    // Buku dan ebook sama-sama punya field author_name; hanya yang tampil yang ikut terkirim.
+    document.getElementById('author_name').disabled = (type !== 'book');
+    document.getElementById('ebook_author_name').disabled = (type !== 'ebook');
+
+    document.getElementById('submit-button').textContent = (type === 'ebook') ? 'Simpan Draf Ebook' : 'Terbitkan ke Pustaka AI';
+
+    if (ebookSec) ebookSec.style.display = (type === 'ebook') ? 'block' : 'none';
     if (bookSec) bookSec.style.display = (type === 'book') ? 'block' : 'none';
     if (podSec) podSec.style.display = (type === 'podcast') ? 'block' : 'none';
     if (acadSec) acadSec.style.display = (type === 'academic') ? 'block' : 'none';

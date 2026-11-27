@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Pustaka AI — Rangkuman Buku, Podcast & Karya Ilmiah Alumni IKMAS')
+@section('title', 'Pustaka AI — Rangkuman Buku, Podcast, Ebook & Karya Ilmiah Alumni IKMAS')
 
 @section('content')
 <div class="container" style="padding-top: 3rem; padding-bottom: 5rem;">
@@ -11,12 +11,12 @@
             Pustaka <span class="text-gradient">AI</span> IKMAS
         </h1>
         <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.6;">
-            Koleksi kurasi intisari buku-buku AI & teknologi terbaik, resume podcast masa depan, serta arsip karya ilmiah (jurnal, tesis, disertasi) karya alumni Assalaam.
+            Koleksi kurasi intisari buku-buku AI & teknologi terbaik, resume podcast masa depan, ebook interaktif tokoh alumni, serta arsip karya ilmiah (jurnal, tesis, disertasi) karya alumni Assalaam.
         </p>
     </div>
 
     <!-- Quick Stats Cards -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2.5rem;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 2.5rem;">
         <div class="card" style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
             <div style="width: 2.75rem; height: 2.75rem; border-radius: var(--radius-md); background: rgba(37,99,235,0.1); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
                 📚
@@ -44,6 +44,16 @@
             <div>
                 <div style="font-size: 1.4rem; font-weight: 800; color: var(--text-main);">{{ $stats['academics'] }}</div>
                 <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Karya Ilmiah Alumni</div>
+            </div>
+        </div>
+
+        <div class="card" style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 2.75rem; height: 2.75rem; border-radius: var(--radius-md); background: rgba(0,104,55,0.1); color: #006837; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                📖
+            </div>
+            <div>
+                <div style="font-size: 1.4rem; font-weight: 800; color: var(--text-main);">{{ $stats['ebooks'] }}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Ebook Interaktif</div>
             </div>
         </div>
 
@@ -79,6 +89,10 @@
                     <a href="{{ route('library.index', array_merge(request()->except('page'), ['type' => 'academic'])) }}" 
                        class="btn btn-sm {{ request('type') === 'academic' ? 'btn-primary' : 'btn-secondary' }}">
                         🎓 Karya Ilmiah
+                    </a>
+                    <a href="{{ route('library.index', array_merge(request()->except('page'), ['type' => 'ebook'])) }}"
+                       class="btn btn-sm {{ request('type') === 'ebook' ? 'btn-primary' : 'btn-secondary' }}">
+                        📖 Ebook
                     </a>
                 </div>
 
@@ -127,7 +141,7 @@
             <!-- Card Thumbnail / Header Cover -->
             @if($item->cover_image)
                 <div style="height: 180px; width: 100%; overflow: hidden; background: var(--bg-surface-alt); position: relative;">
-                    <img src="{{ asset($item->cover_image) }}" alt="{{ $item->title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="{{ asset('storage/' . $item->cover_image) }}" alt="Sampul {{ $item->title }}" style="width: 100%; height: 100%; object-fit: cover;">
                     <span class="badge {{ $item->type_badge['class'] }}" style="position: absolute; top: 0.75rem; left: 0.75rem; font-size: 0.75rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
                         {{ $item->type_badge['icon'] }} {{ $item->type_badge['label'] }}
                     </span>
@@ -191,6 +205,13 @@
                             • Oleh <strong style="color: var(--text-main);">{{ $item->user->name }}</strong>
                         @endif
                     </div>
+                @elseif($item->isEbook())
+                    <div style="font-size: 0.825rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                        {{ $item->series_name ?? 'Ebook' }}@if($item->edition_number) · Edisi #{{ $item->edition_number }}@endif
+                        @if($item->author_name)
+                            • Bersama <strong style="color: var(--text-main);">{{ $item->author_name }}</strong>
+                        @endif
+                    </div>
                 @endif
 
                 <p style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.25rem; flex: 1;">
@@ -204,7 +225,7 @@
                     </span>
                     <a href="{{ route('library.show', $item->slug) }}" class="btn btn-sm btn-primary" style="padding: 0.35rem 0.85rem; font-size: 0.8rem;">
                         @guest
-                            🔒 Buka Teaser
+                            {{ $item->isEbook() ? 'Baca Ebook →' : '🔒 Buka Teaser' }}
                         @else
                             Buka Materi →
                         @endguest
