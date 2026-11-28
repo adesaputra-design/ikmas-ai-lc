@@ -31,21 +31,21 @@
 - Migrated the full application schema to a fresh, disposable MySQL 8.4 database using PHP 8.4.28 with its matching PDO MySQL extension. `library_chapters` and `ebook_progress` each exist once with expected columns. A rollback attempt with saved reading position and assessment history was rejected, and the row remained intact.
 - Re-ran the ebook draft, checklist, reading-progress, and assessment-persistence tests on that disposable MySQL database: **27 tests passed, 193 assertions**. The full 154-test suite remains on SQLite in-memory.
 - The MySQL database was freshly initialized and disposable; it was **not a snapshot of production**. Production's actual database connection and schema/data snapshot were unavailable, so compatibility with the live data set remains unverified.
-- After the owner reported deploying, the live site `https://ai.ikmas.com/library` loaded and showed the Ebook category. The public Ebook count is **0**; `https://ai.ikmas.com/library?type=ebook` showed no matching items.
-- The authenticated admin page `https://ai.ikmas.com/admin/library?tab=ebook` showed **Ebook (0)** and “Tidak Ada Konten Pustaka.” This confirms the deployed UI exposes the Ebook category, but there is currently no Ebook record visible in the live catalogue. No item was created or changed during verification.
+- An earlier live check showed Ebook count **0** on the public listing and admin page. After the owner supplied the Ebook URL, a later check showed **1 Ebook** at `https://ai.ikmas.com/library?type=ebook`; the earlier empty-catalogue finding is superseded.
+- The live entry is [Closing Maksimal dengan 5 Prinsip JARIB](https://ai.ikmas.com/library/closing-maksimal-dengan-5-prinsip-jarib), JARIB edition #1 by Ir. Ghomsony. Its detail page rendered **11 chapters**, a 30-minute reading estimate, and links for reading, JARIB scoring, and printing. Codex only viewed the page; it did not create or edit the item.
 - GitHub showed no automated check runs for PR #3. The local verification results above are not a substitute for production database migration verification.
 
 ## Environment and release boundaries
 
 - PHP 8.4.28 is available locally at `C:\Users\Razaq\AppData\Local\Temp\ikmas-php-8.4.28\php.exe`; the default shell PHP is 8.3.30 and must not be used for locked dependencies.
 - MySQL 8.4 migration verification used an isolated temporary server and a PHP 8.4.28 CLI configuration with the official matching PDO MySQL extension. The temporary server is stopped.
-- The owner reports that the application was deployed. The exact deployed commit and whether production migrations completed were not independently verified.
-- SSH alias `hostinger` resolved, but the server rejected the configured key with `Permission denied (publickey,password)`. No remote inventory command ran, so production home paths, tools, and database schema remain unknown. The private key was not opened or displayed.
+- The owner reports that the application was deployed. The exact deployed commit and migration history were not independently verified; however, the live Ebook detail page successfully rendered the ebook and its chapter list.
+- SSH alias `hostinger` resolved, but the server rejected the configured key with `Permission denied (publickey,password)`. No remote inventory command ran, so production home paths and installed tools remain unknown. The private key was not opened or displayed.
 - No production database snapshot or migration test was performed by Codex, and Codex did not deploy or migrate production.
 - Do not force-push, delete source branches, or close PR #1/#2 before their contributions are confirmed in the merged consolidation.
 
 ## Current release status
 
-The consolidation is merged into `main`, and deployment is reported by the owner. The live Ebook category is present but empty. The implementation is available; Seri JARIB content still needs to be created or published in the admin panel. Production migration compatibility remains unverified until SSH access is fixed and the migration is tested against a secured production database copy.
+The consolidation is merged into `main`, and deployment is reported by the owner. **Closing Maksimal dengan 5 Prinsip JARIB** is live and its 11 chapters render from the Ebook detail page. The catalogue showed one Ebook at the latest check. Production migration history and compatibility with a secured production database copy remain unverified because SSH access is still rejected.
 
 Last updated: 2026-11-28 (Asia/Jakarta).
