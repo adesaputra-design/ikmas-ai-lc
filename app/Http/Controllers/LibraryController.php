@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\LibraryItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class LibraryController extends Controller
 {
@@ -74,8 +75,18 @@ class LibraryController extends Controller
             $item->increment('views_count');
             $chapters = $item->chapters()->get();
             $isBookmarked = Auth::check() && $item->bookmarks()->where('user_id', Auth::id())->exists();
+            $continueChapter = null;
+            $user = Auth::user();
 
-            return view('library.ebook.cover', compact('item', 'chapters', 'isBookmarked'));
+            if ($user?->canSaveEbookProgress()) {
+                $lastChapterId = DB::table('ebook_progress')
+                    ->where('user_id', $user->id)
+                    ->where('library_item_id', $item->id)
+                    ->value('last_chapter_id');
+                $continueChapter = $lastChapterId ? $chapters->firstWhere('id', (int) $lastChapterId) : null;
+            }
+
+            return view('library.ebook.cover', compact('item', 'chapters', 'isBookmarked', 'continueChapter'));
         }
 
         // Increment view count

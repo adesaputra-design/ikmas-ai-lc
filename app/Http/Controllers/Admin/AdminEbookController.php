@@ -9,7 +9,9 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class AdminEbookController extends Controller
 {
@@ -107,6 +109,91 @@ class AdminEbookController extends Controller
         $chapters = $item->chapters()->get();
 
         return view('admin.library.ebook.cover', compact('item', 'chapters'));
+    }
+
+    public function editAssessment(LibraryItem $item): View
+    {
+        abort_unless($item->isEbook(), 404);
+
+        return view('admin.library.ebook.assessment-form', compact('item'));
+    }
+
+    public function updateAssessment(Request $request, LibraryItem $item): RedirectResponse
+    {
+        abort_unless($item->isEbook(), 404);
+
+        $request->validate(['assessment' => ['required', 'string', 'max:50000']]);
+        $definition = json_decode($request->string('assessment')->toString(), true);
+
+        if (! is_array($definition) || json_last_error() !== JSON_ERROR_NONE) {
+            return back()->withErrors(['assessment' => 'Format asesmen harus berupa JSON yang valid.'])->withInput();
+        }
+
+        $validator = Validator::make($definition, [
+            'scale.min' => ['required', 'integer', 'min:0', 'max:10'],
+            'scale.max' => ['required', 'integer', 'min:1', 'max:10', 'gt:scale.min'],
+            'scale.labels' => ['required', 'array'],
+            'scale.labels.*' => ['required', 'string', 'max:100'],
+            'principles' => ['required', 'array', 'min:1'],
+            'principles.*.id' => ['required', 'string', 'max:80', 'regex:/\A[a-zA-Z0-9_-]+\z/', 'distinct'],
+            'principles.*.name' => ['required', 'string', 'max:120'],
+            'principles.*.questions' => ['required', 'array', 'min:1'],
+            'principles.*.questions.*.id' => ['required', 'string', 'max:80', 'regex:/\A[a-zA-Z0-9_-]+\z/', 'distinct'],
+            'principles.*.questions.*.text' => ['required', 'string', 'max:500'],
+            'ranges' => ['required', 'array', 'min:1'],
+            'ranges.*.min' => ['required', 'integer', 'min:0'],
+            'ranges.*.max' => ['required', 'integer', 'min:0', 'gte:ranges.*.min'],
+            'ranges.*.label' => ['required', 'string', 'max:120'],
+            'ranges.*.description' => ['required', 'string', 'max:1000'],
+            'ranges.*.recommendation_chapters' => ['required', 'array', 'min:1'],
+            'ranges.*.recommendation_chapters.*' => [
+                'required',
+                'string',
+                'distinct',
+                Rule::exists('library_chapters', 'slug')->where('library_item_id', $item->id),
+            ],
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors(['assessment' => 'Struktur asesmen belum lengkap atau berisi referensi bab yang tidak valid.'])->withInput();
+        }
+
+        $questionIds = collect($definition['principles'])
+            ->flatMap(fn (array $principle): array => array_column($principle['questions'], 'id'));
+        if ($questionIds->count() !== $questionIds->unique()->count()) {
+            return back()->withErrors(['assessment' => 'Setiap pertanyaan harus memiliki ID unik.'])->withInput();
+        }
+
+        $questionCount = collect($definition['principles'])->sum(fn (array $principle): int => count($principle['questions']));
+        $scaleMin = (int) $definition['scale']['min'];
+        $scaleMax = (int) $definition['scale']['max'];
+        $expectedMin = $questionCount * $scaleMin;
+        $expectedMax = $questionCount * $scaleMax;
+        $ranges = collect($definition['ranges'])->sortBy('min')->values();
+        $nextExpectedMin = $expectedMin;
+
+        foreach ($ranges as $range) {
+            if ((int) $range['min'] !== $nextExpectedMin || (int) $range['max'] < (int) $range['min']) {
+                return back()->withErrors(['assessment' => 'Rentang hasil harus berurutan tanpa celah atau tumpang tindih.'])->withInput();
+            }
+
+            $nextExpectedMin = (int) $range['max'] + 1;
+        }
+
+        if ($nextExpectedMin !== $expectedMax + 1) {
+            return back()->withErrors(['assessment' => 'Rentang hasil harus mencakup semua kemungkinan skor.'])->withInput();
+        }
+
+        for ($value = $scaleMin; $value <= $scaleMax; $value++) {
+            if (! array_key_exists((string) $value, $definition['scale']['labels'])) {
+                return back()->withErrors(['assessment' => 'Setiap nilai dalam skala harus memiliki label.'])->withInput();
+            }
+        }
+
+        $item->update(['assessment' => $definition]);
+
+        return redirect()->route('admin.library.ebook.preview', $item)
+            ->with('success', 'Asesmen ebook berhasil diperbarui.');
     }
 
     public function previewChapter(LibraryItem $item, string $chapter): View
