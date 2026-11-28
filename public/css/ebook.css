@@ -67,15 +67,6 @@
 .ebook-approved-quote figcaption { margin-top: 0.75rem; color: var(--text-main); font-size: 0.9rem; font-weight: 700; }
 .ebook-quote-share { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; margin-top: 0.9rem; }
 .ebook-note { margin-top: 2rem; padding: 1.25rem 1.5rem; background: var(--bg-surface-alt); border-radius: var(--radius-md); }
-.ebook-checklist-items { min-width: 0; margin: 1rem 0 0.5rem; padding: 0; border: 0; }
-.ebook-checklist-items legend { font-weight: 700; }
-.ebook-checklist-item { display: flex; align-items: baseline; gap: 0.65rem; min-height: 44px; padding-block: 0.55rem; cursor: pointer; }
-.ebook-checklist-item input { flex: 0 0 auto; width: 1rem; height: 1rem; accent-color: var(--primary); }
-.ebook-checklist-item span { min-width: 0; overflow-wrap: anywhere; }
-.ebook-checklist-save, .ebook-checklist-login { min-height: 44px; }
-.ebook-checklist-login { display: inline-flex; align-items: center; color: var(--primary); text-decoration: underline; }
-.ebook-checklist-item input:focus-visible, .ebook-checklist-save:focus-visible, .ebook-checklist-login:focus-visible { outline: 3px solid var(--border-focus); outline-offset: 2px; }
-.ebook-checklist-feedback { margin-top: 0.5rem; }
 .ebook-chapter-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1.5rem; }
 .ebook-chapter-nav a { display: flex; flex-direction: column; justify-content: center; gap: 0.25rem; padding: 1rem 1.25rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-main); background: var(--bg-surface); text-decoration: none; }
 .ebook-chapter-nav a:last-child { text-align: right; }
@@ -93,4 +84,45 @@
   .ebook-toc-time { font-size: 0.75rem; }
   .ebook-chapter-nav { grid-template-columns: 1fr; }
   .ebook-chapter-nav a:last-child { text-align: left; }
+}
+
+.ebook-print-page { min-height: 100vh; background: var(--bg-page); color: var(--text-main); }
+.ebook-print-toolbar { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 0.75rem; width: min(100% - 2rem, 50rem); margin: 1rem auto; }
+.ebook-print-toolbar .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding-inline: 1rem; }
+.ebook-print-document { width: min(100% - 2rem, 50rem); margin: 0 auto 4rem; }
+.ebook-print-cover, .ebook-print-chapter { padding: clamp(1.25rem, 4vw, 2.5rem); background: var(--bg-surface); color: var(--text-main); }
+.ebook-print-cover { border-top: 0.35rem solid var(--accent-gold); }
+.ebook-print-cover-image { display: block; max-width: 100%; max-height: 24rem; object-fit: contain; margin: 0 auto 2rem; }
+.ebook-print-cover h1 { font-size: clamp(2rem, 5vw, 3.25rem); line-height: 1.15; margin: 1rem 0; }
+.ebook-print-chapter { margin-top: 1rem; border-top: 1px solid var(--border-color); }
+.ebook-print-chapter > header { margin-bottom: 1.5rem; }
+.ebook-print-chapter h2 { font-size: clamp(1.5rem, 4vw, 2.25rem); line-height: 1.2; }
+.ebook-print-summary, .ebook-print-note { margin: 1.5rem 0; padding: 1rem 1.25rem; border-left: 0.25rem solid var(--primary); background: var(--bg-surface-alt); }
+.ebook-print-summary h3, .ebook-print-note h3 { margin-bottom: 0.5rem; }
+.ebook-print-quotes blockquote { margin: 1.5rem 0; padding: 0.75rem 1.25rem; border-left: 0.25rem solid var(--accent-gold); font-family: Georgia, 'Times New Roman', serif; }
+.ebook-print-quotes footer { margin-top: 0.5rem; font-family: inherit; font-weight: 700; }
+
+@media (max-width: 600px) {
+  .ebook-print-toolbar { flex-direction: column; }
+  .ebook-print-toolbar .btn { width: 100%; }
+  .ebook-print-document { width: min(100% - 1rem, 50rem); }
+  .ebook-print-cover, .ebook-print-chapter { padding: 1.25rem; }
+}
+
+@media print {
+  @page { size: A4; margin: 18mm 16mm; }
+
+  html, body, .ebook-print-page { min-height: 0; background: #fff !important; color: #171717 !important; }
+  .ebook-print-toolbar { display: none !important; }
+  .ebook-print-document { width: auto; max-width: none; margin: 0; padding: 0; }
+  .ebook-print-cover, .ebook-print-chapter { padding: 0; border: 0; border-radius: 0; background: #fff !important; color: #171717 !important; }
+  .ebook-print-cover { break-after: page; page-break-after: always; }
+  .ebook-print-chapter { margin: 0; break-before: page; page-break-before: always; }
+  .ebook-print-cover h1, .ebook-print-chapter h2, .ebook-print-chapter h3 { break-after: avoid-page; page-break-after: avoid; }
+  .ebook-print-summary, .ebook-print-note, .ebook-print-quotes blockquote, .ebook-prose img { break-inside: avoid-page; page-break-inside: avoid; }
+  .ebook-print-summary, .ebook-print-note { border-color: #006837; background: #f4f5f3 !important; }
+  .ebook-print-quotes blockquote { border-color: #c58b00; }
+  .ebook-prose { color: #171717 !important; font-size: 11pt; line-height: 1.65; }
+  .ebook-prose a { color: inherit; text-decoration: none; }
+  .ebook-print-cover-image { max-height: 220mm; }
 }

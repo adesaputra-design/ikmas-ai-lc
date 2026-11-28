@@ -23,8 +23,16 @@
 
         <div class="ebook-cover-actions">
             @if($chapters->isNotEmpty())
-                <a class="btn btn-primary" href="{{ route('library.ebook.chapter', [$item->slug, $chapters->first()->slug]) }}">Mulai Membaca</a>
+                @if($continueChapter)
+                    <a class="btn btn-primary" href="{{ route('library.ebook.chapter', [$item->slug, $continueChapter->slug]) }}">Lanjutkan membaca: {{ $continueChapter->title }}</a>
+                @else
+                    <a class="btn btn-primary" href="{{ route('library.ebook.chapter', [$item->slug, $chapters->first()->slug]) }}">Mulai Membaca</a>
+                @endif
             @endif
+            @if($item->assessment)
+                <a class="btn btn-secondary" href="{{ route('library.ebook.assessment', $item->slug) }}">Cek Skor JARIB-mu</a>
+            @endif
+            <a class="btn btn-secondary" href="{{ route('library.ebook.print', $item->slug) }}">Cetak / Simpan PDF</a>
             @auth
                 <form method="POST" action="{{ route('member.bookmarks.toggle') }}">
                     @csrf

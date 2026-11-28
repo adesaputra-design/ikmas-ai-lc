@@ -7,6 +7,7 @@
 <div style="max-width: 850px; margin: 0 auto;">
     <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
         <a class="btn btn-secondary btn-sm" href="{{ route('admin.library.edit', $item) }}">← Edit Ebook</a>
+        <a class="btn btn-secondary btn-sm" href="{{ route('admin.library.ebook.assessment.edit', $item) }}">Atur Asesmen</a>
         <a class="btn btn-primary btn-sm" href="{{ route('admin.library.ebook.chapters.create', $item) }}">Tambah Bab</a>
     </div>
     <article class="card" style="padding: 2rem;">
@@ -56,6 +57,9 @@
                 @error('chapters')<p role="alert" style="color: #b91c1c;">{{ $message }}</p>@enderror
                 <button class="btn btn-primary" type="submit" @disabled($chapters->isEmpty())>Terbitkan Ebook</button>
             </form>
+        @endif
+        @if($item->assessment)
+            <p style="margin-top: 0.75rem;"><a class="btn btn-secondary" href="{{ route('library.ebook.assessment', $item->slug) }}">Pratinjau Cek Skor</a></p>
         @endif
     </article>
 </div>

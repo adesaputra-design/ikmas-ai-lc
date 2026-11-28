@@ -76,13 +76,21 @@ class User extends Authenticatable
         return $this->status === 'active';
     }
 
+    public function canSaveEbookProgress(): bool
+    {
+        return $this->isAdmin()
+            || $this->isStaff()
+            || $this->isMember()
+            || ($this->isSubscriber() && $this->isActive());
+    }
+
     public function hasPermission(string $permission): bool
     {
         if ($this->isAdmin()) {
             return true;
         }
 
-        if (!$this->isStaff()) {
+        if (! $this->isStaff()) {
             return false;
         }
 
@@ -92,10 +100,10 @@ class User extends Authenticatable
     public function getRoleBadgeAttribute(): array
     {
         return match ($this->role) {
-            'admin'      => ['label' => 'Administrator', 'class' => 'badge-primary'],
-            'staff'      => ['label' => 'Staf Pengurus', 'class' => 'badge-cyan'],
+            'admin' => ['label' => 'Administrator', 'class' => 'badge-primary'],
+            'staff' => ['label' => 'Staf Pengurus', 'class' => 'badge-cyan'],
             'subscriber' => ['label' => 'Subscriber',    'class' => 'badge-amber'],
-            default      => ['label' => 'Member Alumni', 'class' => 'badge-emerald'],
+            default => ['label' => 'Member Alumni', 'class' => 'badge-emerald'],
         };
     }
 
