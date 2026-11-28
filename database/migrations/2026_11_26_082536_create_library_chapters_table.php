@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -36,6 +37,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (DB::table('library_chapters')->exists()) {
+            throw new RuntimeException('Chapter data must be preserved before rolling back the ebook chapter schema.');
+        }
+
         Schema::dropIfExists('library_chapters');
     }
 };

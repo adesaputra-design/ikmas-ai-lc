@@ -1,6 +1,6 @@
 # Plan: Ebook Interaktif Pustaka AI — Seri JARIB
 
-> Source PRD: `prd-pustaka-ebook-seri-jarib.md` (root repository). This plan supersedes the untracked root draft `plan-pustaka-ebook-seri-jarib.md` for implementation sequencing; neither source document is changed here.
+> Source PRD: [`prd-pustaka-ebook-seri-jarib.md`](prd-pustaka-ebook-seri-jarib.md). This file is the canonical phase plan for implementation sequencing.
 
 ## Tujuan dan batasan
 

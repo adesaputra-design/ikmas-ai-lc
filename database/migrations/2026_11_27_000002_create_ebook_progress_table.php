@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -21,6 +22,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (DB::table('ebook_progress')->exists()) {
+            throw new RuntimeException('Ebook progress must be preserved before rolling back its schema.');
+        }
+
         Schema::dropIfExists('ebook_progress');
     }
 };

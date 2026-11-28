@@ -8,6 +8,8 @@ use Illuminate\Support\Str;
 
 class LibraryChapter extends Model
 {
+    public const WORDS_PER_MINUTE = 200;
+
     protected $fillable = [
         'position',
         'slug',
@@ -34,9 +36,11 @@ class LibraryChapter extends Model
     protected static function booted(): void
     {
         static::saving(function (self $chapter): void {
-            $words = preg_match_all('/[\p{L}\p{N}]+/u', $chapter->body ?? '');
-            $chapter->reading_minutes = max(1, (int) ceil($words / 200));
+            $chapter->reading_minutes = $chapter->calculateReadingMinutes();
         });
+
+        static::saved(fn (self $chapter) => $chapter->libraryItem->syncReadingTime());
+        static::deleted(fn (self $chapter) => $chapter->libraryItem->syncReadingTime());
     }
 
     public function libraryItem(): BelongsTo
@@ -50,5 +54,19 @@ class LibraryChapter extends Model
             'html_input' => 'strip',
             'allow_unsafe_links' => false,
         ]);
+    }
+
+    public function calculateReadingMinutes(): int
+    {
+        $text = implode(' ', [
+            $this->body,
+            $this->research_box,
+            $this->action_title,
+            implode(' ', $this->summary_points ?? []),
+            implode(' ', $this->action_checklist ?? []),
+        ]);
+        $words = preg_match_all('/[\p{L}\p{N}]+/u', strip_tags($text));
+
+        return max(1, (int) ceil($words / self::WORDS_PER_MINUTE));
     }
 }

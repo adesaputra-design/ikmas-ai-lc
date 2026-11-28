@@ -209,6 +209,7 @@ class EbookDraftTest extends TestCase
 
         $this->assertSame(['bab-serupa', 'bab-serupa-2'], $ebook->chapters()->pluck('slug')->all());
         $this->assertSame([1, 2], $ebook->chapters()->pluck('position')->all());
+        $this->assertSame('2 menit', $ebook->fresh()->reading_time);
     }
 
     public function test_admin_can_move_chapter_down_without_duplicate_positions(): void
@@ -240,6 +241,51 @@ class EbookDraftTest extends TestCase
         $this->assertSame(1, $ebook->chapters()->where('slug', 'bab-dua')->value('position'));
         $this->actingAs($admin)->get("/admin/library/{$ebook->id}/preview")
             ->assertOk()->assertSeeInOrder(['1. Bab Dua', '2. Bab Satu']);
+    }
+
+    public function test_chapter_update_requires_valid_title_and_body(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $ebook = LibraryItem::create([
+            'title' => 'Draf Validasi Bab', 'slug' => 'draf-validasi-bab', 'type' => 'ebook',
+            'summary_preview' => 'Draf uji.', 'status' => 'pending',
+        ]);
+        $chapter = $ebook->chapters()->create([
+            'position' => 1, 'slug' => 'bab-validasi', 'title' => 'Bab Awal',
+            'summary_points' => ['Poin awal'], 'body' => 'Isi awal.',
+        ]);
+
+        $this->actingAs($admin)->put("/admin/library/{$ebook->id}/chapters/{$chapter->id}", [
+            'title' => '', 'body' => '',
+        ])->assertSessionHasErrors(['title', 'summary_points', 'body']);
+
+        $this->assertSame('Bab Awal', $chapter->fresh()->title);
+        $this->assertSame('Isi awal.', $chapter->fresh()->body);
+    }
+
+    public function test_chapter_reordering_at_both_ends_keeps_order_and_positions(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $ebook = LibraryItem::create([
+            'title' => 'Draf Batas Bab', 'slug' => 'draf-batas-bab', 'type' => 'ebook',
+            'summary_preview' => 'Draf uji.', 'status' => 'pending',
+        ]);
+        $first = $ebook->chapters()->create([
+            'position' => 1, 'slug' => 'bab-pertama', 'title' => 'Bab Pertama',
+            'summary_points' => ['Poin'], 'body' => 'Isi pertama.',
+        ]);
+        $last = $ebook->chapters()->create([
+            'position' => 2, 'slug' => 'bab-terakhir', 'title' => 'Bab Terakhir',
+            'summary_points' => ['Poin'], 'body' => 'Isi terakhir.',
+        ]);
+
+        $this->actingAs($admin)->post("/admin/library/{$ebook->id}/chapters/{$first->id}/move-up")
+            ->assertRedirect(route('admin.library.ebook.preview', $ebook));
+        $this->actingAs($admin)->post("/admin/library/{$ebook->id}/chapters/{$last->id}/move-down")
+            ->assertRedirect(route('admin.library.ebook.preview', $ebook));
+
+        $this->assertSame(['Bab Pertama', 'Bab Terakhir'], $ebook->chapters()->pluck('title')->all());
+        $this->assertSame([1, 2], $ebook->chapters()->pluck('position')->all());
     }
 
     public function test_admin_can_edit_and_delete_chapter_and_positions_are_compacted(): void
@@ -276,6 +322,8 @@ class EbookDraftTest extends TestCase
             'title' => 'Bab Pertama Diperbarui',
             'body' => 'Konten yang diperbarui.',
         ]);
+        $this->assertSame('bab-satu', $first->fresh()->slug);
+        $this->assertSame('3 menit', $ebook->fresh()->reading_time);
         $this->actingAs($admin)->get("/admin/library/{$ebook->id}/preview/bab/{$first->slug}")
             ->assertOk()->assertSee('Konten yang diperbarui.');
 
@@ -286,6 +334,7 @@ class EbookDraftTest extends TestCase
         $this->assertSame(['bab-satu', 'bab-terakhir'], $ebook->chapters()->pluck('slug')->all());
         $this->assertSame([1, 2], $ebook->chapters()->pluck('position')->all());
         $this->assertDatabaseHas('library_chapters', ['id' => $last->id, 'position' => 2]);
+        $this->assertSame('2 menit', $ebook->fresh()->reading_time);
     }
 
     public function test_chapter_routes_cannot_edit_or_move_another_ebooks_chapter(): void

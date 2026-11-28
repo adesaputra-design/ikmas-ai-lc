@@ -72,6 +72,20 @@ class LibraryItem extends Model
         return $this->hasMany(LibraryChapter::class)->orderBy('position');
     }
 
+    public function syncReadingTime(): void
+    {
+        if (! $this->isEbook()) {
+            return;
+        }
+
+        $minutes = (int) $this->chapters()->sum('reading_minutes');
+        $readingTime = $minutes > 0 ? "{$minutes} menit" : null;
+
+        if ($this->reading_time !== $readingTime) {
+            $this->update(['reading_time' => $readingTime]);
+        }
+    }
+
     public function isEbook(): bool
     {
         return $this->type === 'ebook';

@@ -169,7 +169,7 @@ class EbookPublicTest extends TestCase
             ->assertSee('Narasumber Uji')
             ->assertSee('Blockquote biasa tanpa atribusi.')
             ->assertSee('https://wa.me/?text=')
-            ->assertSee(rawurlencode('http://localhost:8000/library/ebook-kutipan-uji/bab/bab-kutipan'));
+            ->assertSee(rawurlencode(route('library.ebook.chapter', [$ebook->slug, 'bab-kutipan'])));
     }
 
     public function test_reader_strips_raw_html_and_unsafe_markdown_links(): void

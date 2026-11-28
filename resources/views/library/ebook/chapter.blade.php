@@ -68,12 +68,38 @@
             </aside>
         @endif
 
-        @if($chapter->action_title)
-            <section class="ebook-note">
-                <h2>Amalkan Pekan Ini</h2>
-                <p>{{ $chapter->action_title }}</p>
+        @if($chapter->action_title || $chapter->action_checklist)
+            <section class="ebook-note" id="amalkan-pekan-ini" aria-labelledby="ebook-action-heading">
+                <h2 id="ebook-action-heading">Amalkan Pekan Ini</h2>
+                @if($chapter->action_title)<p>{{ $chapter->action_title }}</p>@endif
                 @if($chapter->action_checklist)
-                    <ul>@foreach($chapter->action_checklist as $action)<li>{{ $action }}</li>@endforeach</ul>
+                    @if($canSaveChecklist)
+                        <form method="POST" action="{{ route('library.ebook.progress', $item->slug) }}">
+                            @csrf
+                            <input type="hidden" name="chapter_id" value="{{ $chapter->id }}">
+                            <input type="hidden" name="checklist_version" value="{{ $checklistVersion }}">
+                    @endif
+                    <fieldset class="ebook-checklist-items">
+                        <legend>Checklist</legend>
+                        @foreach($chapter->action_checklist as $index => $action)
+                            <label class="ebook-checklist-item">
+                                <input type="checkbox" name="checked[]" value="{{ $index }}" @checked(in_array($index, $checked, true))>
+                                <span>{{ $action }}</span>
+                            </label>
+                        @endforeach
+                    </fieldset>
+                    @if($canSaveChecklist)
+                            @if($errors->any())<p role="alert">{{ $errors->first() }}</p>@endif
+                            <button class="btn btn-secondary btn-sm ebook-checklist-save" type="submit">Simpan checklist</button>
+                            @if(session('ebook_checklist_saved'))<p class="ebook-checklist-feedback" role="status">Checklist tersimpan.</p>@endif
+                        </form>
+                    @else
+                        @guest
+                            <a class="ebook-checklist-login" href="{{ route('login') }}">Masuk untuk menyimpan checklist</a>
+                        @else
+                            <p>Penyimpanan checklist tersedia untuk akun aktif.</p>
+                        @endguest
+                    @endif
                 @endif
             </section>
         @endif

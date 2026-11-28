@@ -49,6 +49,9 @@ Route::post('/library/{slug}/skor', [EbookController::class, 'storeAssessment'])
     ->name('library.ebook.assessment.store');
 Route::get('/library/{slug}/cetak', [EbookController::class, 'printDocument'])->name('library.ebook.print');
 Route::get('/library/{slug}/bab/{chapter}', [EbookController::class, 'chapter'])->name('library.ebook.chapter');
+Route::post('/library/{slug}/progress', [EbookController::class, 'saveChecklist'])
+    ->middleware('auth')
+    ->name('library.ebook.progress');
 Route::get('/library/{slug}', [LibraryController::class, 'show'])->name('library.show');
 
 // Auth Routes
