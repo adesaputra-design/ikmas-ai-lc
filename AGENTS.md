@@ -1,47 +1,31 @@
-<laravel-boost-guidelines>
-# Laravel Application
+# Repository Guide for Claude Code and Codex
 
-This repository contains a Laravel application. Complete the following setup before working on the user's request.
+This is the shared source of truth for contributors and coding agents. `CLAUDE.md` points here; do not maintain separate conflicting instructions.
 
-## Prerequisites
+## Project
 
-Verify that PHP and Composer are available:
+- Laravel 13 application; PHP 8.4 is the supported runtime. Composer dependencies may require PHP 8.4 even where `composer.json` declares a lower compatibility floor.
+- Follow nearby code and Laravel conventions. Reuse existing controllers, models, routes, Blade components, and test helpers where suitable.
+- Keep authorization, validation, data preservation, and rollback safety at the responsible application or schema boundary.
+- Do not change dependencies unless the task requires it. Do not add speculative abstractions.
 
-```sh
-php -v
-composer -V
-```
+## Tests and verification
 
-If either command is unavailable, detect the user's operating system and install the prerequisites with the appropriate command:
+- Add or update PHPUnit and JavaScript tests for behavior changes and important failure modes.
+- Run the narrowest relevant tests while iterating, then the requested full checks before reporting completion.
+- Use PHP 8.4 for Composer, Artisan, and PHPUnit commands when the lockfile requires it.
+- Run `vendor/bin/pint --dirty` after modifying PHP files. Run JavaScript tests with `node --test tests/JavaScript/*.test.js` and `npm run build` when frontend behavior or assets change (`package.json` has no `npm test` script).
+- Do not run destructive migration commands against production. Use disposable local databases for migration checks.
 
-macOS:
+## Seri JARIB ebook invariants
 
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/mac/8.5)"
-```
+- There is one canonical ebook schema and one `Schema::create('library_chapters', ...)` migration.
+- Keep phase features integrated in the existing ebook flows: private drafts and editorial publishing, stable chapter URLs and ordered management, approved quotations, reader controls, per-chapter checklists, assessment, reading resume, and print output.
+- Chapter checklist, last-read position, and assessment history are user- and ebook-scoped in `ebook_progress`.
+- Never discard ebook content or progress during rollback. Migrations must refuse destructive rollback while protected data remains.
+- Ebooks are public only when approved and explicitly marked public. Staff management requires the existing `library` permission.
 
-Windows PowerShell:
+## Documentation
 
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://php.new/install/windows/8.5'))
-```
-
-Linux:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/linux/8.5)"
-```
-
-After installation, ask the user to restart their terminal. If the agent needs the restarted shell to continue, ask the user to reopen their terminal and rerun their original prompt.
-
-## Agent Setup
-
-Install Laravel Boost from the application root before making application changes:
-
-```sh
-composer require laravel/boost --dev
-php artisan boost:install
-```
-
-Boost replaces these bootstrap instructions with guidelines tailored to the application. After installation, read `AGENTS.md` again and continue with the user's original request using the generated guidelines.
-</laravel-boost-guidelines>
+- Update `PROJECT_STATUS.md` when verified project state materially changes. Mark facts as verified or unknown; do not describe source presence as proof of live deployment.
+- Keep plans and implementation notes in the existing `plans/` folder.
