@@ -102,6 +102,6 @@
         @endif
     </article>
 </main>
-<script type="application/json" id="ebook-assessment-definition">{{ Illuminate\Support\Js::encode($item->assessment) }}</script>
+<script type="application/json" id="ebook-assessment-definition">{!! Illuminate\Support\Js::encode($item->assessment) !!}</script>
 <div id="ebook-assessment-chapter-url" data-template="{{ route('library.ebook.chapter', [$item->slug, '__chapter__']) }}" hidden></div>
 @endsection
